@@ -4,8 +4,10 @@
 #include <memory>
 #include <vector>
 #include <set>
+#include <stack>
 
 #include "BalanceMap.h"
+#include "utils.h"
 
 namespace AccountBalancer {
     struct BalanceMap::BalanceMapImpl {
@@ -14,6 +16,9 @@ namespace AccountBalancer {
 
         //all the folks
         std::set<std::string> folks;
+
+        //expense list
+        std::stack<std::shared_ptr<Expense>> expense_list;
     };
 
     BalanceMap::BalanceMap(std::initializer_list<std::string> il) {
@@ -109,15 +114,31 @@ namespace AccountBalancer {
     }
 
     void BalanceMap::addDebt(const std::vector<Debt>& debts) {
-        //validate all the name first, if one name is not recognized, 
-        //do not add it to the balance map
-        for (const Debt& debt: debts) {
-            if (!validateName(debt.debtor) || !validateName(debt.creditor))
-                return;
-        }
         //commit change
         for (const Debt& debt: debts) {
             addDebt(debt);
+        }
+    }
+
+    void BalanceMap::addExpense(std::shared_ptr<Expense> expense_ptr) {
+        //expense need to be added to the list
+        std::vector<Debt> debts;
+        expenseToDebts(*expense_ptr, debts);
+        addDebt(debts);
+        pimpl->expense_list.push(expense_ptr);
+    }
+
+    void BalanceMap::undoExpense() {
+        if (pimpl->expense_list.empty()) {
+            std::cout << "!!!!!        Expense list is empty       !!!!!" << std::endl;
+        }
+        else {
+            auto expense_ptr = pimpl->expense_list.top();
+            pimpl->expense_list.pop();
+            expense_ptr->amount *= -1;
+            std::vector<Debt> debts;
+            expenseToDebts(*expense_ptr, debts);
+            addDebt(debts);
         }
     }
 

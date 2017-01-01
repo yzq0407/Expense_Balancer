@@ -47,9 +47,14 @@ namespace AccountBalancer {
 
         void addDebt(const std::vector<Debt>& debts);
 
+        void addExpense(std::shared_ptr<Expense> expense_ptr);
+
+        void undoExpense();
+
         bool validateName(const std::string& name);
     };
 
     std::ostream& operator<<(std::ostream& os, const BalanceMap& balanceMap);
+
 }  //AccountBalancer
 #endif

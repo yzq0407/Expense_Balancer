@@ -10,5 +10,18 @@ namespace AccountBalancer {
             << transaction.creditor << "   $" << transaction.amount;
         return os;
     }
+
+    void expenseToDebts(const Expense& expense, std::vector<Debt>& debts){
+        double total = 0.0;
+        for (auto it = expense.weight.begin(), last = expense.weight.end();
+                it != last; ++it) {
+            total += it->second;
+        }
+        for (auto it = expense.weight.begin(), last = expense.weight.end();
+                it != last; ++it) {
+            double share = static_cast<double>(it->second) / total;
+            debts.push_back(Debt(expense.creditor, it->first, share * expense.amount));
+        }
+    }
 } //AccountBalancer
                         
