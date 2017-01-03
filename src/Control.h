@@ -20,10 +20,16 @@ namespace AccountBalancer {
 
         void addFolks(const std::vector<std::string>&);
         void removeFolks(const std::vector<std::string>&);
+        void printFolks() const;
 
-        void addExpParticipants(const std::vector<std::string>&);
+        //the main menu show option
+        void showMain(const std::vector<std::string>&);
 
-        void removeExpParticipants(const std::vector<std::string>&);
+        void showExp(const std::vector<std::string>&);
+
+        void addExpParticipants(const std::vector<std::string>&, Expense&) const;
+
+        void removeExpParticipants(const std::vector<std::string>&, Expense&) const;
 
     public:
         Control(const Control&) = delete;
@@ -33,10 +39,11 @@ namespace AccountBalancer {
         //singleton method
         static Control& getControl();
 
+        void printWelcome() const;
         //controls
         void control_main();
 
-        void control_expense(Expense expense);
+        void control_expense(std::shared_ptr<Expense> expense);
 
     };
 }

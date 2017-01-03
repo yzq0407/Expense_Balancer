@@ -30,13 +30,8 @@ namespace AccountBalancer {
         }
 
         //split a line by space delimiter
-        std::vector<std::string> splitLine(std::string& str) {
-            std::istringstream iss(str);
-            std::vector<std::string> tokens;
-            copy(std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>(),
-                    back_inserter(tokens));
-            return tokens;
-        }
+        std::vector<std::string> splitLine(std::string& str);
+
     } // Utils
 }  //AccountBalancer
 #endif

@@ -6,24 +6,31 @@
 
 #include <stack>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 #include <iostream>
 #include <memory>
+
 namespace AccountBalancer {
     //a single commit in the expense report, we can roll back at any time
     struct ExpenseCommit;
 
+    //the expense class
     class Expense { 
     public:
         //constructor
-        template <typename... T>
-        explicit Expense(T&&... args);
+        explicit Expense(const std::string& _creditor,
+                double _amount = 0,
+                const std::set<std::string>& participants = {});
+        //dtor
+        ~Expense();
 
         //accessors
         int numOfParticipants() const noexcept;
         void printCommitsHistory(bool verbose = true) const;
         void printExpenseTitle() const;
+        void printExpenseWeight() const;
 
         //modifiers
         void setNote(std::string) noexcept;
@@ -36,8 +43,18 @@ namespace AccountBalancer {
         void rollBack(const ExpenseCommit& commit);
 
     private:
-        struct ExpImpl;
-        std::shared_ptr<ExpImpl> pimpl;
+        //creditor
+        std::string creditor;
+        //total amount, always nonegative
+        double amount;
+        //a notation
+        std::string note;
+        //commit history
+        std::deque<std::unique_ptr<ExpenseCommit>> commit_hist;
+        //the current weight split
+        std::map<std::string, int> weights;
+        
+
 
     friend std::ostream& operator<<(std::ostream&, const Expense&);
     };

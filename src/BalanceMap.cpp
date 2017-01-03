@@ -38,7 +38,7 @@ namespace AccountBalancer {
         pimpl->map.clear();
     }
 
-    void BalanceMap::addDebt(const Debt& debt) {
+    void BalanceMap::addDebt(const Utils::Debt& debt) {
         double original = 0;
         if (pimpl->map[debt.debtor].find(debt.creditor) 
                 != pimpl->map[debt.debtor].end())
@@ -49,7 +49,7 @@ namespace AccountBalancer {
 
         double updated = original + debt.amount;
 
-        if (isEqual(updated, 0.0)) {
+        if (Utils::isEqual(updated, 0.0)) {
             pimpl->map[debt.creditor].erase(debt.debtor);
             pimpl->map[debt.debtor].erase(debt.creditor);
         }
@@ -63,9 +63,9 @@ namespace AccountBalancer {
         }
     }
 
-    void BalanceMap::addDebt(const std::vector<Debt>& debts) {
+    void BalanceMap::addDebt(const std::vector<Utils::Debt>& debts) {
         //commit change
-        for (const Debt& debt: debts) {
+        for (auto& debt: debts) {
             addDebt(debt);
         }
     }

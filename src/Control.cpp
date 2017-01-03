@@ -10,8 +10,20 @@
 #include "InputReader.h"
 
 namespace {
-    constexpr const char* welcome = "Welcome using account balancer to optimize \
-                                     transfers, type '--help' for more info";
+    constexpr const char* welcome 
+        = "===========================================================\n"
+          "===========================================================\n"
+          "Welcome using account balancer to optimize balance transfers\n"
+          "Type '--help' for more info\n"
+          "===========================================================\n"
+          "===========================================================\n";
+
+    constexpr const char* main_menu_title
+        = "[main menu] $";
+
+    constexpr const char* add_expense_title
+        = "[add expense] $";
+
     enum ControlStatus {
         Main,
         Expense
@@ -35,9 +47,16 @@ namespace {
         Rm_Part,
         CG_WG,
         Show,
+        Commit,
         Help,
         Quit,
         Undefine
+    };
+
+    enum class Show_Opt_Main {
+        Expense,
+        Partic,
+        Balance,
     };
 
     const std::unordered_map<std::string, Action_Main> 
@@ -61,11 +80,20 @@ namespace {
             {"--cw", Action_Exp::CG_WG},
             {"--show", Action_Exp::Show},
             {"--help", Action_Exp::Help},
+            {"--commit", Action_Exp::Commit},
             {"--quit", Action_Exp::Quit}
+        };
+
+    const std::unordered_map<std::string, Show_Opt_Main>
+        show_map_main {
+            {"expense", Show_Opt_Main::Expense},
+            {"partic", Show_Opt_Main::Partic},
+            {"balance", Show_Opt_Main::Balance},
         };
 
     inline Action_Main parseOptionMain(const std::vector<std::string> &tokens) {
         if (tokens.size() == 0 || option_map_main.find(tokens[0]) == option_map_main.end()) {
+            std::cerr << "unkown option" <<  ((tokens.size() != 0)? (": " + tokens[1]): "") << std::endl;
             return Action_Main::Undefine;
         }
         return option_map_main.at(tokens[0]);
@@ -76,6 +104,13 @@ namespace {
             return Action_Exp::Undefine;
         }
         return option_map_exp.at(tokens[0]);
+    }
+
+    inline Show_Opt_Main parseOptionsShowMain(const std::vector<std::string> &tokens) {
+        if (tokens.size() < 2 || show_map_main.find(tokens[1]) == show_map_main.end()) {
+            return Show_Opt_Main::Expense;
+        }
+        return show_map_main.at(tokens[1]);
     }
 
 }
@@ -111,17 +146,21 @@ namespace AccountBalancer {
         }
     }
 
+    //print welcome message
+    void Control::printWelcome() const {
+        std::cout << welcome << std::endl;
+    }
+
+    //singleton method
+    Control& Control::getControl() {
+        static Control control;
+        return control;
+    }
+
     //add and remove all the folks
     void Control::addFolks(const std::vector<std::string>& folks) {
-        if (folks.empty()) {
-            std::string input;
-            std::getline(std::cin, input);
-            std::vector<std::string> tokens = Utils::splitLine(input);
-            addFolks(tokens);
-        }
-        else {
-            pimpl->participants.insert(folks.begin(), folks.end());
-        }
+        pimpl->participants.insert(folks.begin(), folks.end());
+        std::cout << "added " << pimpl->participants.size() << " folks" << std::endl;
     }
 
     void Control::removeFolks(const std::vector<std::string>& folks) {
@@ -138,17 +177,50 @@ namespace AccountBalancer {
         }
     }
 
-    //for an expense session add and remove multiple participants
-    void Control::addExpParticipants(const std::vector<std::string>& folks) {
+    void Control::printFolks() const {
+        for (auto& name: pimpl->participants) {
+            std::cout << name << "  ";
+        }
+        std::cout << std::endl;
     }
 
-    void Control::removeExpParticipants(const std::vector<std::string>& folks) {
+    //The main menu show option
+    void Control::showMain(const std::vector<std::string>& args) {
+        switch (parseOptionsShowMain(args)) {
+            case Show_Opt_Main::Expense:
+                printExpense();
+                break;
+            case Show_Opt_Main::Partic:
+                printFolks();
+                break;
+            case Show_Opt_Main::Balance:
+                std::cout << pimpl->map << std::endl;
+                break;
+        }
+    }
+
+
+    //for an expense session add and remove multiple participants
+    void Control::addExpParticipants(const std::vector<std::string>& names,
+            Expense& expense) const {
+        for (auto& name: names) {
+            if (pimpl->participants.find(name) == pimpl->participants.end()) {
+                std::cerr << name << " is not in the main participants pool" << std::endl;
+                std::cerr << "Aborted" << std::endl;
+                return;
+            }
+        }
+        expense.addParticipant(names);
+    }
+
+    void Control::removeExpParticipants(const std::vector<std::string>& folks, Expense& expense) const{
     }
 
     void Control::control_main() {
         bool run = true;
         std::string input;
         while (run) {
+            std::cout << main_menu_title << std::endl;
             std::getline(std::cin, input);
             std::vector<std::string> tokens = Utils::splitLine(input);
             switch (parseOptionMain(tokens)) {
@@ -183,11 +255,15 @@ namespace AccountBalancer {
                             }
                         }
                         if (tokens.size() >= 4) {
-                            control_expense(Expense(std::move(creditor), amount, 
-                                        std::move(tokens[4])));
+                            std::set<std::string> partics(tokens.begin() + 3, tokens.end());
+                            partics.insert(creditor);
+                            auto expense_ptr = std::make_shared<Expense>(creditor, amount,
+                                    partics);
+                            control_expense(expense_ptr);
                         }
                         else {
-                            control_expense(Expense(creditor, amount));
+                            auto expense_ptr = std::make_shared<Expense>(creditor, amount, pimpl->participants); 
+                            control_expense(expense_ptr);
                         }
                     }
                     break;
@@ -201,7 +277,7 @@ namespace AccountBalancer {
                 case Action_Main::Verb:
                     break;
                 case Action_Main::Show:
-                    printExpense();
+                    showMain(tokens);
                     break;
                 case Action_Main::Help:
                     break;
@@ -214,34 +290,41 @@ namespace AccountBalancer {
         }
     }
 
-    void Control::control_expense(Expense expense) {
+    void Control::control_expense(std::shared_ptr<Expense> expense_ptr) {
         std::cout << "============== Expense session ================" << std::endl;
-        expense.printExpenseTitle();
+        expense_ptr->printExpenseTitle();
         bool run = true;
         std::string input;
         while (run) {
+            std::cout << add_expense_title << std::endl;
             std::getline(std::cin, input);
             std::vector<std::string> tokens = Utils::splitLine(input);
             switch (parseOptionExp(tokens)) {
                 case Action_Exp::Add_Part:
-                    addExpParticipants(std::vector<std::string>(++tokens.begin(), tokens.end()));
+                    addExpParticipants(std::vector<std::string>(++tokens.begin(), tokens.end()), *expense_ptr);
                     break;
 
                 case Action_Exp::Rm_Part:
-                    removeExpParticipants(std::vector<std::string>(++tokens.begin(), tokens.end()));
+                    removeExpParticipants(std::vector<std::string>(++tokens.begin(), tokens.end()), *expense_ptr);
                     break;
 
                 case Action_Exp::CG_WG:
+                    std::cout << "change weight " << std::endl;
                     break;
 
                 case Action_Exp::Show:
-                    expense.printCommitsHistory(true);
+                    expense_ptr->printExpenseTitle();
+                    expense_ptr->printExpenseWeight();
+                    break;
+
+                case Action_Exp::Commit:
                     break;
 
                 case Action_Exp::Help:
                     break;
 
                 case Action_Exp::Quit:
+                    std::cout << std::endl;
                     run = false;
                     break;
 
