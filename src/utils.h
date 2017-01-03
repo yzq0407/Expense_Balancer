@@ -1,6 +1,8 @@
 #ifndef __ACCOUNT_BALANCE_UTILS
 #define __ACCOUNT_BALANCE_UTILS
 #include <string>
+#include <sstream>
+#include <iterator>
 #include <iostream>
 #include <cmath>
 #include <map>
@@ -11,30 +13,30 @@ namespace {
 } //anonymous namespace
 
 namespace AccountBalancer {
-    struct Debt {
-        std::string creditor;
-        std::string debtor;
-        double amount;
+    namespace Utils {
+        struct Debt {
+            std::string creditor;
+            std::string debtor;
+            double amount;
 
-        Debt(const std::string& _creditor, 
-                const std::string& _debtor, double _amount);
-    };
+            Debt(const std::string& _creditor, 
+                    const std::string& _debtor, double _amount);
+        };
 
-    struct Expense {
-        std::string creditor;
-        std::string notes;
-        std::map<std::string, int> weight;
-        double amount;
-    };
+        std::ostream& operator<<(std::ostream& os, const Debt& transaction);
 
+        inline bool isEqual(double a, double b) {
+            return std::abs(a - b) <= eps;
+        }
 
-    std::ostream& operator<<(std::ostream& os, const Debt& transaction);
-
-    void expenseToDebts(const Expense& expense, std::vector<Debt>& debts);
-
-    inline bool isEqual(double a, double b) {
-        return std::abs(a - b) <= eps;
-    }
-
+        //split a line by space delimiter
+        std::vector<std::string> splitLine(std::string& str) {
+            std::istringstream iss(str);
+            std::vector<std::string> tokens;
+            copy(std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>(),
+                    back_inserter(tokens));
+            return tokens;
+        }
+    } // Utils
 }  //AccountBalancer
 #endif

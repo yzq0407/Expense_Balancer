@@ -23,6 +23,7 @@ namespace AccountBalancer {
         //accessors
         int numOfParticipants() const noexcept;
         void printCommitsHistory(bool verbose = true) const;
+        void printExpenseTitle() const;
 
         //modifiers
         void setNote(std::string) noexcept;

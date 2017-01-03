@@ -80,6 +80,7 @@ namespace AccountBalancer {
         std::cout << std::endl;
     }
 
+
     //--------------------------Expense---------------------------
 
     template <typename... T>
@@ -89,34 +90,44 @@ namespace AccountBalancer {
 
     //-----------private fields--------------
     struct Expense::ExpImpl {
+        //creditor
+        std::string creditor;
+        //total amount, always nonegative
+        double amount;
         //a notation
         std::string note;
         //commit history
         std::deque<ExpenseCommit> commit_hist;
         //the current weight split
         std::map<std::string, int> weights;
-        //total amount, always nonegative
-        double amount;
 
         //inline ctors
-        explicit ExpImpl(const std::string& _note = default_note, 
-                double _amount = 0): note(_note), amount(_amount) {}
+        explicit ExpImpl(const std::string& _creditor,
+                double _amount = 0,
+                const std::string& _note = default_note):
+                    creditor(_creditor), amount(_amount), note(_note){}
 
-        explicit ExpImpl(std::string&& _note, double _amount = 0):
-            note(std::move(_note)), amount(_amount) {}
+        ExpImpl(std::string&& _creditor, double _amount, std::string&& _note):
+            creditor(std::move(_creditor)), amount(_amount), note(std::move(_note)) {}
 
-        explicit ExpImpl(const std::vector<std::string>& participants):
+        explicit ExpImpl(const std::string& _creditor, 
+                const std::vector<std::string>& participants, double _amount = 0):
+            creditor(_creditor),
             note(default_note),
-            amount(0) {
+            amount(_amount) {
             for (const auto& participant: participants) {
                 weights[participant] = 1;
             }
         }
 
-        ExpImpl(const std::vector<std::string>& participants, double _amount):
-            ExpImpl(participants)
+        ExpImpl(std::string&& _creditor, 
+                const std::vector<std::string>& participants, double _amount):
+            creditor(std::move(_creditor)),
+            amount(_amount)
         {
-            amount = _amount;
+            for (const auto& participant: participants) {
+                weights[participant] = 1;
+            }
         }
     };
 
@@ -129,6 +140,12 @@ namespace AccountBalancer {
         for (auto& commit: pimpl->commit_hist) {
             printExpenseCommit(commit, verbose);
         }
+    }
+
+    void Expense::printExpenseTitle() const {
+        std::cout << "  Creditor:  " << pimpl->creditor << std::endl;
+        std::cout << "  Amount:   $" << pimpl->amount << std::endl;
+        std::cout << "  Note:      " << pimpl->note << std::endl;
     }
 
     //modifiers
