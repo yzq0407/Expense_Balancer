@@ -32,6 +32,9 @@ namespace AccountBalancer {
         //split a line by space delimiter
         std::vector<std::string> splitLine(std::string& str);
 
+        //concatenate multiple string tokens into single space separated string
+        std::string concatTokens(const std::vector<std::string>& tokens, int start, int end);
+
     } // Utils
 }  //AccountBalancer
 #endif

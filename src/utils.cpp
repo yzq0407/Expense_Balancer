@@ -1,4 +1,7 @@
+#include <sstream>
+
 #include "utils.h"
+#include "Expense.h"
 
 namespace AccountBalancer {
     namespace Utils {
@@ -19,18 +22,15 @@ namespace AccountBalancer {
                     back_inserter(tokens));
             return tokens;
         }
-        /* void expenseToDebts(const Expense& expense, std::vector<Debt>& debts){ */
-        /*     double total = 0.0; */
-        /*     for (auto it = expense.weight.begin(), last = expense.weight.end(); */
-        /*             it != last; ++it) { */
-        /*         total += it->second; */
-        /*     } */
-        /*     for (auto it = expense.weight.begin(), last = expense.weight.end(); */
-        /*             it != last; ++it) { */
-        /*         double share = static_cast<double>(it->second) / total; */
-        /*         debts.push_back(Debt(expense.creditor, it->first, share * expense.amount)); */
-        /*     } */
-        /* } */
+
+        std::string concatTokens(const std::vector<std::string>& tokens, int start, int end) {
+            std::stringstream ss;
+            for (int pos = start; pos < end; ++pos) {
+                ss << tokens[pos] << " ";
+            }
+            return ss.str();
+        }
+
     } //Utils
 } //AccountBalancer
                         

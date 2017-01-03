@@ -105,6 +105,14 @@ namespace AccountBalancer {
         return weights.size();
     }
 
+    bool Expense::hasParticipant(const std::string& name) const {
+        return weights.find(name) != weights.end();
+    }
+
+    int Expense::getWeight(const std::string& name) const {
+        return weights.at(name);
+    }
+
     void Expense::printCommitsHistory(bool verbose) const {
         for (auto& commit: commit_hist) {
             printExpenseCommit(*commit, verbose);
@@ -159,7 +167,7 @@ namespace AccountBalancer {
                 weights.erase(name);
             }
             else {
-                std::cout << "ignore " << name << " for it's not in the participants list" << std::endl;
+                std::cerr << "ignore " << name << " for it's not in the participants list" << std::endl;
             }
         }
         commit_hist.push_back(std::move(commit_ptr));
@@ -211,6 +219,23 @@ namespace AccountBalancer {
                 weights.erase(diff.first);
             }
         }
+    }
+
+    std::vector<Utils::Debt> Expense::toDebts(bool isReverse) {
+        using Utils::Debt;
+        double totalWeight = 0.0;
+        double coeff = isReverse? -1.0: 1.0;
+        std::vector<Debt> res;
+        for (auto it = weights.begin(), last = weights.end();
+                it != last; ++it) {
+            totalWeight += it -> second;
+        }
+        for (auto it = weights.begin(), last = weights.end();
+                it != last; ++it) {
+            double share = static_cast<double>(it->second) / totalWeight;
+            res.push_back(Debt(creditor, it->first, coeff * share * amount));
+        }
+        return res;
     }
 
     std::ostream& operator<<(std::ostream& os, const Expense& expense) {

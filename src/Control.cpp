@@ -14,7 +14,7 @@ namespace {
         = "===========================================================\n"
           "===========================================================\n"
           "Welcome using account balancer to optimize balance transfers\n"
-          "Type '--help' for more info\n"
+          "'help' for more info\n"
           "===========================================================\n"
           "===========================================================\n";
 
@@ -44,6 +44,7 @@ namespace {
 
     enum class Action_Exp {
         Add_Part,
+        Add_Note,
         Rm_Part,
         CG_WG,
         Show,
@@ -61,27 +62,27 @@ namespace {
 
     const std::unordered_map<std::string, Action_Main> 
         option_map_main {
-            {"--add-p", Action_Main::Add_Part}, 
-            {"--rm-p", Action_Main::Rm_Part}, 
-            {"--add-exp", Action_Main::Add_Exp},
-            {"--rm-exp", Action_Main::Add_Exp},
-            {"--add-exp", Action_Main::Add_Exp},
-            {"--verbose", Action_Main::Verb},
-            {"--show", Action_Main::Show},
-            {"--opt", Action_Main::Opt},
-            {"--help", Action_Main::Help},
-            {"--quit", Action_Main::Quit}
+            {"add-p", Action_Main::Add_Part}, 
+            {"rm-p", Action_Main::Rm_Part}, 
+            {"add-exp", Action_Main::Add_Exp},
+            {"rm-exp", Action_Main::Rm_Exp},
+            {"verbose", Action_Main::Verb},
+            {"show", Action_Main::Show},
+            {"opt", Action_Main::Opt},
+            {"help", Action_Main::Help},
+            {"quit", Action_Main::Quit}
         };
 
     const std::unordered_map<std::string, Action_Exp>
         option_map_exp {
-            {"--add-p", Action_Exp::Add_Part},
-            {"--rm-p", Action_Exp::Rm_Part},
-            {"--cw", Action_Exp::CG_WG},
-            {"--show", Action_Exp::Show},
-            {"--help", Action_Exp::Help},
-            {"--commit", Action_Exp::Commit},
-            {"--quit", Action_Exp::Quit}
+            {"add-p", Action_Exp::Add_Part},
+            {"add-n", Action_Exp::Add_Note},
+            {"rm-p", Action_Exp::Rm_Part},
+            {"cw", Action_Exp::CG_WG},
+            {"show", Action_Exp::Show},
+            {"help", Action_Exp::Help},
+            {"commit", Action_Exp::Commit},
+            {"quit", Action_Exp::Quit}
         };
 
     const std::unordered_map<std::string, Show_Opt_Main>
@@ -134,6 +135,8 @@ namespace AccountBalancer {
             std::cerr << "No expense history yet" << std::endl;
         }
         else {
+            auto expense_ptr = pimpl->expense_hist.front();
+            pimpl->map.addDebt(expense_ptr->toDebts(true));
             pimpl->expense_hist.pop_front();
         }
     }
@@ -177,6 +180,16 @@ namespace AccountBalancer {
         }
     }
 
+    bool Control::validateParticipant(const std::set<std::string>& names) {
+        for (auto& name: names) {
+            if (pimpl->participants.find(name) == pimpl->participants.end()) {
+                std::cerr << name << " is not in the participants list" << std::endl;
+                return false;
+            }
+        }
+        return true;
+    }
+
     void Control::printFolks() const {
         for (auto& name: pimpl->participants) {
             std::cout << name << "  ";
@@ -214,12 +227,19 @@ namespace AccountBalancer {
     }
 
     void Control::removeExpParticipants(const std::vector<std::string>& folks, Expense& expense) const{
+        expense.removeParticipant(folks);
+    }
+
+    void Control::commitExpense(std::shared_ptr<Expense> expense_ptr) {
+        pimpl->map.addDebt(expense_ptr->toDebts());
+        pimpl->expense_hist.push_front(expense_ptr);
     }
 
     void Control::control_main() {
         bool run = true;
         std::string input;
         while (run) {
+            std::cout << std::endl;
             std::cout << main_menu_title << std::endl;
             std::getline(std::cin, input);
             std::vector<std::string> tokens = Utils::splitLine(input);
@@ -256,10 +276,12 @@ namespace AccountBalancer {
                         }
                         if (tokens.size() >= 4) {
                             std::set<std::string> partics(tokens.begin() + 3, tokens.end());
-                            partics.insert(creditor);
-                            auto expense_ptr = std::make_shared<Expense>(creditor, amount,
-                                    partics);
-                            control_expense(expense_ptr);
+                            if (validateParticipant(partics)) {
+                                partics.insert(creditor);
+                                auto expense_ptr = std::make_shared<Expense>(creditor, amount,
+                                        partics);
+                                control_expense(expense_ptr);
+                            }
                         }
                         else {
                             auto expense_ptr = std::make_shared<Expense>(creditor, amount, pimpl->participants); 
@@ -286,7 +308,7 @@ namespace AccountBalancer {
                 case Action_Main::Quit:
                     run = false;
                     break;
-            }
+            } 
         }
     }
 
@@ -296,6 +318,7 @@ namespace AccountBalancer {
         bool run = true;
         std::string input;
         while (run) {
+            std::cout << std::endl;
             std::cout << add_expense_title << std::endl;
             std::getline(std::cin, input);
             std::vector<std::string> tokens = Utils::splitLine(input);
@@ -304,13 +327,39 @@ namespace AccountBalancer {
                     addExpParticipants(std::vector<std::string>(++tokens.begin(), tokens.end()), *expense_ptr);
                     break;
 
+                case Action_Exp::Add_Note:
+                    if (tokens.size() > 1)
+                        expense_ptr->setNote(Utils::concatTokens(tokens, 1, tokens.size()));
+                    break;
+
                 case Action_Exp::Rm_Part:
                     removeExpParticipants(std::vector<std::string>(++tokens.begin(), tokens.end()), *expense_ptr);
                     break;
 
-                case Action_Exp::CG_WG:
+                case Action_Exp::CG_WG: 
+                {
                     std::cout << "change weight " << std::endl;
+                    std::vector<std::pair<std::string, int>> weight_pairs;
+                    for (int pos = 2; pos < tokens.size(); pos += 2) {
+                        if (!expense_ptr->hasParticipant(tokens[pos - 1]))
+                        {
+                            std::cerr << "Unknown participant: " << tokens[pos - 1] <<std::endl;
+                            std::cerr << "To add participants, use --add-p" <<std::endl;
+                            break;
+                        }
+                        int newWeight = 1;
+                        //make sure the weight value is correct
+                        try {
+                            newWeight = std::stoi(tokens[pos]);
+                            weight_pairs.push_back(std::make_pair(tokens[pos - 1], newWeight));
+                        } catch(const std::invalid_argument&) {
+                            std::cerr << "invalid weight value: " << tokens[pos] << std::endl;
+                            break;
+                        }
+                    }
+                    expense_ptr->changeWeights(weight_pairs);
                     break;
+                }
 
                 case Action_Exp::Show:
                     expense_ptr->printExpenseTitle();
@@ -318,6 +367,8 @@ namespace AccountBalancer {
                     break;
 
                 case Action_Exp::Commit:
+                    commitExpense(expense_ptr);
+                    run = false;
                     break;
 
                 case Action_Exp::Help:

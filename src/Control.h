@@ -15,11 +15,14 @@ namespace AccountBalancer {
         std::unique_ptr<ControlImpl> pimpl;
         Control();
 
+        //helper methods
         void undoExpense();
         void printExpense() const;
 
         void addFolks(const std::vector<std::string>&);
         void removeFolks(const std::vector<std::string>&);
+
+        bool validateParticipant(const std::set<std::string>&);
         void printFolks() const;
 
         //the main menu show option
@@ -30,6 +33,8 @@ namespace AccountBalancer {
         void addExpParticipants(const std::vector<std::string>&, Expense&) const;
 
         void removeExpParticipants(const std::vector<std::string>&, Expense&) const;
+
+        void commitExpense(std::shared_ptr<Expense> expense_ptr);
 
     public:
         Control(const Control&) = delete;
@@ -43,7 +48,7 @@ namespace AccountBalancer {
         //controls
         void control_main();
 
-        void control_expense(std::shared_ptr<Expense> expense);
+        void control_expense(std::shared_ptr<Expense>);
 
     };
 }

@@ -12,6 +12,8 @@
 #include <iostream>
 #include <memory>
 
+#include "utils.h"
+
 namespace AccountBalancer {
     //a single commit in the expense report, we can roll back at any time
     struct ExpenseCommit;
@@ -28,6 +30,9 @@ namespace AccountBalancer {
 
         //accessors
         int numOfParticipants() const noexcept;
+        bool hasParticipant(const std::string&) const;
+        int getWeight(const std::string&) const;
+
         void printCommitsHistory(bool verbose = true) const;
         void printExpenseTitle() const;
         void printExpenseWeight() const;
@@ -42,6 +47,9 @@ namespace AccountBalancer {
         void rollBack();
         void rollBack(const ExpenseCommit& commit);
 
+        //to debts
+        std::vector<Utils::Debt> toDebts(bool isReverse = false);
+
     private:
         //creditor
         std::string creditor;
@@ -53,8 +61,6 @@ namespace AccountBalancer {
         std::deque<std::unique_ptr<ExpenseCommit>> commit_hist;
         //the current weight split
         std::map<std::string, int> weights;
-        
-
 
     friend std::ostream& operator<<(std::ostream&, const Expense&);
     };
