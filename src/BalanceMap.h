@@ -29,6 +29,8 @@ namespace AccountBalancer {
         //accessors
         double getMoneyOwe(const std::string& debtor, const std::string& creditor) const;
 
+        std::vector<std::string> getAllPeople() const;
+
         const std::unordered_map<std::string, double>* getAllDebts(const std::string& debtor) const;
 
         void clear();

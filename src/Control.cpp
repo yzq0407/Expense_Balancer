@@ -7,7 +7,7 @@
 #include "BalanceMap.h"
 #include "Expense.h"
 #include "Control.h"
-#include "InputReader.h"
+#include "Optimizer.h"
 
 namespace {
     constexpr const char* welcome 
@@ -121,7 +121,8 @@ namespace AccountBalancer {
         BalanceMap map;
         std::deque<std::shared_ptr<Expense>> expense_hist;
         std::set<std::string> participants;
-        
+        //optimizer contains all the optimization history
+        BalanceOptimizer* optimizer = nullptr;
         ControlStatus status = Main;
     };
 

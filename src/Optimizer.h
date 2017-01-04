@@ -15,9 +15,11 @@ namespace AccountBalancer {
     public:
         BalanceOptimizer();
 
-        std::vector<Debt> getOptimizedTransactions(const BalanceMap&);
+        BalanceMap& optimizeTransactions(const BalanceMap& original_map);
+
+        BalanceMap& getLatestOptimization() const;
     };
-}
+} //AccountBalancer
 
 #endif
 
