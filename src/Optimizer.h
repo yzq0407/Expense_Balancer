@@ -10,13 +10,35 @@
 namespace AccountBalancer {
     enum class OptimizerStatus {
         SUCCESS,
+        OUT_OF_TIME,
+        NAME_NOT_FOUND,
         FAILED
     };
+
+    enum class OptimizerStrategy {
+        LEAST_TRANSFER,
+        LAZY
+    };
+
+    struct Transfer {
+        std::string other;
+        //if the amount is positive, meaning "other" owe you
+        //otherwise, you owe "other"
+        double amount;
+        Transfer(const std::string _other, double _amount):
+            other(_other),
+            amount(_amount) {}
+    };
+
 
     class BalanceOptimizer {
     private:
         struct BalanceOptimizerImpl;
         std::unique_ptr<BalanceOptimizerImpl> pimpl;
+
+        OptimizerStatus lazyOptimize();
+
+        OptimizerStatus leastTransferOptimize();
 
     public:
         BalanceOptimizer();
@@ -25,15 +47,16 @@ namespace AccountBalancer {
         bool isUpToTime(const std::chrono::time_point<std::chrono::system_clock>& time_point) const;
 
         //given a set of expenses, optimize it, return status code
-        OptimizerStatus optimizeExpenses(const std::vector<std::shared_ptr<Expense>>& expenses);
-
-        //output a summary of transfers
-        OptimizerStatus printAllTransfers() const;
+        OptimizerStatus optimizeExpenses(const std::vector<std::shared_ptr<Expense>>& expenses,
+                OptimizerStrategy);
 
         //output a single person's transfers
         OptimizerStatus printParticipantTransfers(const std::string& name) const;
 
-        //print a single person's expense summary
+        //print a single person's expenses
+        OptimizerStatus printParticipantExpenses(const std::string& name) const;
+
+        //print a single person's expense summary, an overall report for expense and transfer
         OptimizerStatus printParticipantSummary(const std::string& name) const;
     };
 
@@ -71,35 +94,32 @@ namespace AccountBalancer {
         //add one more expense
         void addExpense(std::shared_ptr<Expense> expense);
 
+        //add one more transfer
+        void addTransfer(const Transfer& transfer);
+        void addTransfer(Transfer&& transfer);
+
         //get the total_expense this person supposed to make
         double& getTotalExpense();
-
         const double& getTotalExpense() const;
 
         //get how much this person paid at the first place
         double& getPaymentMade();
-
         const double& getPaymentMade() const;
 
+        //get all the transfers
+        std::vector<Transfer>& getTransfers();
+        const std::vector<Transfer>& getTransfers() const;
+
+        //get all the expenses
+        std::vector<std::weak_ptr<Expense>> getExpenses();
+        const std::vector<std::weak_ptr<Expense>> getExpenses() const;
     };
-
-    struct Transfer {
-        std::string other;
-        //if the amount is positive, meaning "other" owe you
-        //otherwise, you owe "other"
-        double amount;
-        Transfer(const std::string _other, double _amount):
-            other(_other),
-            amount(_amount) {}
-
-    };
-
 } //AccountBalancer
 
 namespace std {
-    void swap(AccountBalancer::TransferSummary& left, 
-            AccountBalancer::TransferSummary& right) noexcept;
+    template <>
+    void swap<AccountBalancer::TransferSummary> (AccountBalancer::TransferSummary&,
+            AccountBalancer::TransferSummary&) noexcept;
 } //std
-
 #endif
 

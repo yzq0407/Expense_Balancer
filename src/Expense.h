@@ -32,6 +32,11 @@ namespace AccountBalancer {
         int numOfParticipants() const noexcept;
         bool hasParticipant(const std::string&) const;
         int getWeight(const std::string&) const;
+        int getWeightSum() const;
+        double getAmount() const;
+        std::string getCreditor() const;
+        std::string getNote() const;
+        const std::map<std::string, int>& getWeightsMap() const;
 
         void printCommitsHistory(bool verbose = true) const;
         void printExpenseTitle() const;
@@ -61,6 +66,8 @@ namespace AccountBalancer {
         std::deque<std::unique_ptr<ExpenseCommit>> commit_hist;
         //the current weight split
         std::map<std::string, int> weights;
+        //total weight
+        int total_weight;
 
     friend std::ostream& operator<<(std::ostream&, const Expense&);
     };

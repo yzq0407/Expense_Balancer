@@ -4,7 +4,87 @@
 #include "Optimizer.h"
 #include "Expense.h"
 
+namespace {
+    //helper method to calculate the gaps
+    //which is defined to be the absolute different of payment being made by a participant
+    //and the amount he/she should spend
+    void getExpenseGaps (
+            const std::map<std::string, AccountBalancer::TransferSummary>& personalExpenses,
+            std::vector<std::pair<std::string, double>>& creditor_gaps,
+            std::vector<std::pair<std::string, double>>& debtor_gaps) {
+        //process each participant
+        for (auto it = personalExpenses.cbegin(), last = personalExpenses.cend();
+                it != last; ++it) {
+            auto name = it->first;
+            double payment_made = it->second.getPaymentMade();
+            double total_expense = it->second.getTotalExpense();
+            double gap = payment_made - total_expense;
+            if (AccountBalancer::Utils::isGreater(gap, 0.0)) {
+                creditor_gaps.push_back(std::make_pair(name, gap));
+            }
+            else if (AccountBalancer::Utils::isLess(gap, 0.0)) {
+                debtor_gaps.push_back(std::make_pair(name, -gap));
+            }
+            //ignore person whose gap is 0, they do not need to make transfers
+        }
+        //sort the gaps, based on the gap value
+        auto comparator = [](const std::pair<std::string, double>& p1, 
+                const std::pair<std::string, double>& p2) -> bool {
+            return p1.second < p2.second;
+        };
+        std::sort(creditor_gaps.begin(), creditor_gaps.end(), comparator);
+        std::sort(debtor_gaps.begin(), debtor_gaps.end(), comparator);
+    }
+
+    bool findSubsetSum(double target, std::vector<std::pair<std::string, double>>& pool, 
+            int pos, long long& mask) {
+        //if the target is already 0, apparently the subset represent by mask is a valid answer
+        if (AccountBalancer::Utils::isEqual(target, 0.0)) return true;
+        //since the pool is sorted, we can stop search faster
+        if (pos >= pool.size() || AccountBalancer::Utils::isGreater(pool[pos].second, target)) return false;
+        //either we take pool[pos], or not
+        if (!AccountBalancer::Utils::isEqual(pool[pos].second, 0.0)) {
+            //search taking pool[pos]
+            double temp = pool[pos].second;
+            pool[pos].second = 0.0;
+            //flip mask value
+            mask |= (1 << pos);
+            if (findSubsetSum(target - temp, pool, pos + 1, mask)) {
+                return true;
+            }
+            //back track
+            mask |= (1 << pos);
+            pool[pos].second = temp;
+        }
+        //search not taking pool[pos]
+        return findSubsetSum(target, pool, pos + 1, mask);
+    }
+
+    //transfer comparator, used to sort all the transfers
+    auto transfer_comparator_out_first = [] (const AccountBalancer::Transfer& t1, 
+            const AccountBalancer::Transfer& t2) -> bool {
+        return t1.amount != t2.amount? t1.amount < t2.amount: t1.other < t2.other;
+    };
+
+    auto transfer_comparator_in_first = [] (const AccountBalancer::Transfer& t1, 
+            const AccountBalancer::Transfer& t2) -> bool {
+        return t2.amount != t1.amount? t2.amount < t1.amount: t1.other < t2.other;
+    };
+
+} //annoymous namespace
+
 namespace AccountBalancer {
+    //transfer operator
+    std::ostream& operator<<(std::ostream& os, const Transfer& transfer) {
+        if (transfer.amount > 0) {
+            os << "Send     $" << transfer.amount  << " to    " << transfer.other;
+        }
+        else {
+            os << "Receive  $" << -transfer.amount << " from  " << transfer.other;
+        }
+        return os;
+    }
+
     //optimizer implimentations
     struct BalanceOptimizer::BalanceOptimizerImpl {
         bool verbose = false;
@@ -17,6 +97,137 @@ namespace AccountBalancer {
         std::map<std::string, TransferSummary> result;
     };
 
+    //helper functions
+    OptimizerStatus BalanceOptimizer::leastTransferOptimize() {
+        //get the gaps for both creditors and debtors
+        //for definition of gaps, see function definition
+        std::vector<std::pair<std::string, double>> creditor_gaps;
+        std::vector<std::pair<std::string, double>> debtor_gaps;
+        getExpenseGaps(pimpl->result, creditor_gaps, debtor_gaps);
+        //least transfers require us to find whether there is a subset sum 
+        //from debtor_gaps to each gap values in creditor_gaps
+        //and vice versa, in this case, generate a bit mask to represent whether there is an 
+        //subset 
+        long long mask = 0;
+        for (int pos = 0; pos < creditor_gaps.size(); ++pos) {
+            if (findSubsetSum(creditor_gaps[pos].second, debtor_gaps, 0, mask)) {
+                //put the subset represented by mask into transfers
+                creditor_gaps[pos].second = 0.0;
+                const std::string creditor = creditor_gaps[pos].first;
+                for (int pos_debtor = 0; pos_debtor < debtor_gaps.size() && mask != 0; ++pos_debtor) {
+                    if ((1 << pos_debtor) & mask) {
+                        const std::string debtor = debtor_gaps[pos_debtor].first;
+                        double transfer_amount = debtor_gaps[pos_debtor].second;
+                        mask |= (1<< pos_debtor);
+                        pimpl->result.at(creditor).addTransfer(Transfer(debtor,
+                                    transfer_amount));
+                        pimpl->result.at(debtor).addTransfer(Transfer(creditor,
+                                    -transfer_amount));
+                    }
+                }
+            }
+        }
+        for (int pos = 0; pos < debtor_gaps.size(); ++pos) {
+            if (!Utils::isEqual(debtor_gaps[pos].second, 0.0) &&
+                    findSubsetSum(debtor_gaps[pos].second, creditor_gaps, 0, mask)) {
+                debtor_gaps[pos].second = 0.0;
+                const std::string debtor = debtor_gaps[pos].first;
+                for (int pos_creditor = 0; pos_creditor < creditor_gaps.size() && mask != 0; ++pos_creditor) {
+                    if ((1 << pos_creditor) & mask) {
+                        mask |= (1 << pos_creditor);
+                        const std::string creditor = creditor_gaps[pos_creditor].first;
+                        double transfer_amount = creditor_gaps[pos_creditor].second;
+                        pimpl->result.at(creditor).addTransfer(Transfer(debtor, 
+                                    transfer_amount));
+                        pimpl->result.at(debtor).addTransfer(Transfer(creditor,
+                                    -transfer_amount));
+                    }
+                }
+            }
+        }
+        //now doing lazy evaluating
+        int pos_c = 0, pos_d = 0;
+        while (pos_c < creditor_gaps.size() && pos_d < debtor_gaps.size()) {
+            const std::string& creditor = creditor_gaps[pos_c].first;
+            double& creditor_gap = creditor_gaps[pos_c].second;
+
+            const std::string& debtor = debtor_gaps[pos_d].first;
+            double& debtor_gap = debtor_gaps[pos_d].second;
+            if (Utils::isEqual(creditor_gap, debtor_gap)) {
+                ++pos_c;
+                continue;
+            }
+            if (Utils::isEqual(debtor_gap, creditor_gap)) {
+                ++pos_d;
+                continue;
+            }
+            if (Utils::isGreater(creditor_gap, debtor_gap)) {
+                pimpl->result.at(creditor).addTransfer(Transfer(debtor, debtor_gap));
+                pimpl->result.at(debtor).addTransfer(Transfer(creditor, -debtor_gap));
+                creditor_gap -= debtor_gap;
+                ++pos_d;
+            }
+            else if (Utils::isGreater(debtor_gap, creditor_gap)) {
+                pimpl->result.at(creditor).addTransfer(Transfer(debtor, creditor_gap));
+                pimpl->result.at(debtor).addTransfer(Transfer(creditor, -creditor_gap));
+                debtor_gap -= creditor_gap;
+                ++pos_c;
+            }
+            else {
+                pimpl->result.at(creditor).addTransfer(Transfer(debtor, creditor_gap));
+                pimpl->result.at(debtor).addTransfer(Transfer(creditor, -debtor_gap));
+
+                ++pos_c;
+                ++pos_d;
+            }
+        }
+        return OptimizerStatus::SUCCESS;
+    }
+
+    //the lazy optimization, do not try to perfectly match participants expense
+    OptimizerStatus BalanceOptimizer::lazyOptimize() {
+        std::vector<std::pair<std::string, double>> creditor_gaps;
+        std::vector<std::pair<std::string, double>> debtor_gaps;
+        getExpenseGaps(pimpl->result, creditor_gaps, debtor_gaps);
+        //since this is a lazy optimization, match each pair greedily
+        int pos_c = 0, pos_d = 0;
+        while (pos_c < creditor_gaps.size() && pos_d < debtor_gaps.size()) {
+            const std::string& creditor = creditor_gaps[pos_c].first;
+            double& creditor_gap = creditor_gaps[pos_c].second;
+
+            const std::string& debtor = debtor_gaps[pos_d].first;
+            double& debtor_gap = debtor_gaps[pos_d].second;
+            if (Utils::isEqual(creditor_gap, debtor_gap)) {
+                ++pos_c;
+                continue;
+            }
+            if (Utils::isEqual(debtor_gap, creditor_gap)) {
+                ++pos_d;
+                continue;
+            }
+            if (Utils::isGreater(creditor_gap, debtor_gap)) {
+                pimpl->result.at(creditor).addTransfer(Transfer(debtor, debtor_gap));
+                pimpl->result.at(debtor).addTransfer(Transfer(creditor, -debtor_gap));
+                creditor_gap -= debtor_gap;
+                ++pos_d;
+            }
+            else if (Utils::isGreater(debtor_gap, creditor_gap)) {
+                pimpl->result.at(creditor).addTransfer(Transfer(debtor, creditor_gap));
+                pimpl->result.at(debtor).addTransfer(Transfer(creditor, -creditor_gap));
+                debtor_gap -= creditor_gap;
+                ++pos_c;
+            }
+            else {
+                pimpl->result.at(creditor).addTransfer(Transfer(debtor, creditor_gap));
+                pimpl->result.at(debtor).addTransfer(Transfer(creditor, -debtor_gap));
+
+                ++pos_c;
+                ++pos_d;
+            }
+        }
+        return OptimizerStatus::SUCCESS;
+    }
+
     BalanceOptimizer::BalanceOptimizer(): pimpl(std::make_unique<BalanceOptimizerImpl>()) {}
 
     bool BalanceOptimizer::isUpToTime (
@@ -25,7 +236,8 @@ namespace AccountBalancer {
     }
 
     OptimizerStatus BalanceOptimizer::optimizeExpenses(
-            const std::vector<std::shared_ptr<Expense>>& expenses) {
+            const std::vector<std::shared_ptr<Expense>>& expenses,
+            OptimizerStrategy strategy) {
         pimpl->result.clear();
         //process each expenses
         for (auto& expense: expenses) {
@@ -54,38 +266,95 @@ namespace AccountBalancer {
             }
             pimpl->result.at(creditor).getPaymentMade() += amount;
         }
-
-        //the strategy to optimize the gap
-        //"gap" is defined to be the difference between the amount this person should pay
-        //and the he actually paied
-        //overall, the gap must be 0, but we want to optimize such that the total number of
-        //transfers is minimum
-        std::vector<std::pair<std::string, double>> gaps;
-        gaps.reserve(pimpl->result.size());
-        //for each person, calculate gap and put it into the vector
-        for (auto it = pimpl->result.cbegin(), last = pimpl->result.cend();
-                it != last; ++it) {
-            auto name = it->first;
-            double payment_made = it->second.getPaymentMade();
-            double total_expense = it->second.getTotalExpense();
-            double gap = payment_made - total_expense;
-            gaps.push_back(std::make_pair(name, gap));
+        switch (strategy) {
+            case OptimizerStrategy::LEAST_TRANSFER:
+                return leastTransferOptimize();
+            case OptimizerStrategy::LAZY:
+                return lazyOptimize();
         }
-        //sort the gaps, based on the gap value
-        auto comparator = [](const std::pair<std::string, double>& p1, 
-                const std::pair<std::string, double>& p2) -> bool {
-            return p1.second < p2.second;
-        };
-        std::sort(gaps.begin(), gaps.end(), comparator);
-        //use dfs to get the minimum amount of transfer
+    }
 
+    OptimizerStatus BalanceOptimizer::printParticipantTransfers(const std::string& name) const {
+        if (pimpl->result.find(name) == pimpl->result.end()) {
+            return OptimizerStatus::NAME_NOT_FOUND;
+        }
+        const TransferSummary summary = pimpl->result.at(name);
+        for (const Transfer& transfer: summary.getTransfers()) {
+            std::cout << "\t" << transfer << std::endl;
+        }
         return OptimizerStatus::SUCCESS;
     }
 
+
+    OptimizerStatus BalanceOptimizer::printParticipantExpenses(const std::string& name) const {
+        if (pimpl->result.find(name) == pimpl->result.end()) {
+            return OptimizerStatus::NAME_NOT_FOUND;
+        }
+        const TransferSummary summary = pimpl->result.at(name);
+        
+        std::vector<std::shared_ptr<Expense>> expense_paid;
+
+        std::cout << "Expenses Details " << std::endl;
+        for (auto expense_wptr: summary.getExpenses()) {
+            if (expense_wptr.expired())  return OptimizerStatus::OUT_OF_TIME;
+            auto expense_sptr = expense_wptr.lock();
+            //if the creditor, push into the expense
+            if (expense_sptr->getCreditor() == name)    expense_paid.push_back(expense_sptr);
+            //all the attributes
+            double total_amount = expense_sptr->getAmount();
+            int share =expense_sptr->getWeight(name);
+            int total_weight = expense_sptr->getWeightSum();
+            double amount = total_amount * static_cast<double>(share) / static_cast<double>(total_weight);
+            const char* note = expense_sptr->getNote().c_str();
+            printf("$%-8.2f%-15s(%d out of %d)\n", amount, note, share, total_weight);
+        }
+        printf("Total expenses:         $%-.2f\n", summary.getTotalExpense());
+        std::cout << std::endl;
+
+        if (!expense_paid.empty()) {
+            std::cout << "Expense paid by " << name << std::endl;
+            for (auto& expense_sptr: expense_paid) {
+                double total_amount = expense_sptr->getAmount();
+                const char* note = expense_sptr->getNote().c_str();
+                printf("$%-8.2f%-15s\n", total_amount, note);
+            }
+            printf("Total payment made:     $%-.2f\n", summary.getPaymentMade());
+        }
+        else {
+            std::cout << "No payment was paid by " << name << std::endl;
+        }
+        return OptimizerStatus::SUCCESS;
+    }
+
+    OptimizerStatus BalanceOptimizer::printParticipantSummary(const std::string& name) const {
+        if (pimpl->result.find(name) == pimpl->result.end()) {
+            return OptimizerStatus::NAME_NOT_FOUND;
+        }
+        std::cout << std::string(60, '-') << std::endl;
+        int padding = (60 - name.size() - 4) / 2;
+        if (padding < 0)    padding = 0;
+        std::cout << std::string(padding, '-') << std::string(4, ' ') << name 
+            << std::string(4, ' ') << std::string(padding, '-') << std::endl;
+        std::cout << std::endl;
+        OptimizerStatus return_code = printParticipantExpenses(name);
+        if (return_code == OptimizerStatus::SUCCESS) {
+            return return_code;
+        }
+        std::cout << std::endl;
+        return_code = printParticipantTransfers(name);
+        if (return_code == OptimizerStatus::SUCCESS)
+            return return_code;
+        std::cout << std::endl;
+        return OptimizerStatus::SUCCESS;
+    }
+
+
+
+    //----------------------TransferSummary class--------------------//
     //transfer summay implementation
     struct TransferSummary::TransferSummaryImpl {
         //name of the person
-        std::string name;
+        const std::string name;
         //all the expenses that is engaged in, use weak pointer since it might dangle
         std::vector<std::weak_ptr<Expense>> expenses;
         //a list of transfers that are supposed to happen, it is a list of debt, also, use weak_ptr
@@ -140,6 +409,15 @@ namespace AccountBalancer {
         }
     }
 
+    //add one more transfer
+    void TransferSummary::addTransfer(const Transfer& transfer) {
+        pimpl->transfers.push_back(transfer);
+    }
+
+    void TransferSummary::addTransfer(Transfer&& transfer) {
+        pimpl->transfers.push_back(std::move(transfer));
+    }
+
     //get total expense
     double& TransferSummary::getTotalExpense() {
         return pimpl->total_expense;
@@ -156,6 +434,15 @@ namespace AccountBalancer {
 
     const double& TransferSummary::getPaymentMade() const {
         return pimpl->payment_made;
+    }
+
+    //get transfers
+    std::vector<Transfer>& TransferSummary::getTransfers() {
+        return pimpl->transfers;
+    }
+
+    const std::vector<Transfer>& TransferSummary::getTransfers() const {
+        return pimpl->transfers;
     }
 } //AccountBalancer
 

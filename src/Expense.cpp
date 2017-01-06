@@ -7,6 +7,8 @@
 namespace {
     constexpr const char* default_note = "no notes";
 
+    constexpr int weight_upper_limit = 999;
+
     enum CommitType {
         WeightChange,
         AddPartic,
@@ -90,11 +92,12 @@ namespace AccountBalancer {
             const std::set<std::string>& participants):
         creditor(_creditor),
         amount(_amount), 
-        note(default_note) {
-            for (const auto& participant: participants) {
-                weights[participant] = 1;
-            }
-        }
+        note(default_note),
+        total_weight(participants.size()){
+        for (const auto& participant: participants) {
+             weights[participant] = 1;
+         }
+    }
 
     //dtor
     Expense::~Expense() = default;
@@ -109,8 +112,28 @@ namespace AccountBalancer {
         return weights.find(name) != weights.end();
     }
 
+    double Expense::getAmount() const {
+        return amount;
+    }
+
     int Expense::getWeight(const std::string& name) const {
         return weights.at(name);
+    }
+
+    int Expense::getWeightSum() const {
+        return total_weight;
+    }
+
+    std::string Expense::getCreditor() const {
+        return creditor;
+    }
+
+    std::string Expense::getNote() const {
+        return note;
+    }
+
+    const std::map<std::string, int>& Expense::getWeightsMap() const {
+        return weights;
     }
 
     void Expense::printCommitsHistory(bool verbose) const {
@@ -150,9 +173,10 @@ namespace AccountBalancer {
             if (weights.find(name) == weights.end()) {
                 weights[name] = 1;
                 commit_ptr->diffs.push_back(std::make_pair(name, std::make_pair(0, 1)));
+                total_weight += 1;
             }
             else {
-                std::cout << "ignore " << name << " for it is already in the participants list" << std::endl;
+                std::cerr << "ignore " << name << " for it is already in the participants list" << std::endl;
             }
         }
         commit_hist.push_back(std::move(commit_ptr));
@@ -164,6 +188,7 @@ namespace AccountBalancer {
             if (weights.find(name) != weights.end()) {
                 commit_ptr->diffs.push_back(std::make_pair(name, 
                             std::make_pair(weights[name], 0)));
+                total_weight -= weights[name];
                 weights.erase(name);
             }
             else {
@@ -185,12 +210,13 @@ namespace AccountBalancer {
         for (auto& change: change_list) {
             int before = weights[change.first];
             int after = change.second;
-            if (after < 0) {
-                std::cout << change.first << "'s share weight can not be negative" << std::endl;
-                std::cout << "aborted" << std::endl;
+            if (after < 0 || after > weight_upper_limit) {
+                std::cerr << change.first << "'s share weight can not be negative" << std::endl;
+                std::cerr << "aborted" << std::endl;
                 rollBack(*commit_ptr);
                 break;
             }
+            total_weight += (after - before);
             commit_ptr->diffs.push_back(std::make_pair(change.first,
                         std::make_pair(before, after)));
             weights[change.first] = after;
@@ -211,13 +237,14 @@ namespace AccountBalancer {
 
     void Expense::rollBack(const ExpenseCommit& commit) {
         for (auto& diff: commit.diffs) {
-            int before = diff.second.first;
+            int before = diff.second.first, after = diff.second.second;
             if (before) {
                 weights[diff.first] = before;
             }
             else {
                 weights.erase(diff.first);
             }
+            total_weight -= (after - before);
         }
     }
 
