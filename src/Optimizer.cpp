@@ -1,3 +1,5 @@
+//This class optimize balance transfers given bunch of expenses
+//Created by Theodore Yang on 1/5/2017
 #include <chrono>
 #include <algorithm>
 
@@ -16,7 +18,7 @@ namespace {
         for (auto it = personalExpenses.cbegin(), last = personalExpenses.cend();
                 it != last; ++it) {
             auto name = it->first;
-            double payment_made = it->second.getPaymentMade();
+            double payment_made = it->second.getPaymentMadeValue();
             double total_expense = it->second.getTotalExpense();
             double gap = payment_made - total_expense;
             if (AccountBalancer::Utils::isGreater(gap, 0.0)) {
@@ -61,29 +63,29 @@ namespace {
     }
 
     //transfer comparator, used to sort all the transfers
-    auto transfer_comparator_out_first = [] (const AccountBalancer::Transfer& t1, 
-            const AccountBalancer::Transfer& t2) -> bool {
-        return t1.amount != t2.amount? t1.amount < t2.amount: t1.other < t2.other;
-    };
+    /* auto transfer_comparator_out_first = [] (const AccountBalancer::Transfer& t1, */ 
+    /*         const AccountBalancer::Transfer& t2) -> bool { */
+    /*     return t1.amount != t2.amount? t1.amount < t2.amount: t1.other < t2.other; */
+    /* }; */
 
-    auto transfer_comparator_in_first = [] (const AccountBalancer::Transfer& t1, 
-            const AccountBalancer::Transfer& t2) -> bool {
-        return t2.amount != t1.amount? t2.amount < t1.amount: t1.other < t2.other;
-    };
+    /* auto transfer_comparator_in_first = [] (const AccountBalancer::Transfer& t1, */ 
+    /*         const AccountBalancer::Transfer& t2) -> bool { */
+    /*     return t2.amount != t1.amount? t2.amount < t1.amount: t1.other < t2.other; */
+    /* }; */
+
+    void printTransfer(const AccountBalancer::Transfer& transfer) {
+        if (transfer.amount < 0) {
+            printf("Send       $%-8.2fto%20s\n", -transfer.amount, transfer.other.c_str());
+        }
+        else if (transfer.amount > 0) {
+            printf("Receive    $%-8.2ffrom%18s\n", transfer.amount, transfer.other.c_str());
+        }
+    }
 
 } //annoymous namespace
 
 namespace AccountBalancer {
     //transfer operator
-    std::ostream& operator<<(std::ostream& os, const Transfer& transfer) {
-        if (transfer.amount > 0) {
-            os << "Send     $" << transfer.amount  << " to    " << transfer.other;
-        }
-        else {
-            os << "Receive  $" << -transfer.amount << " from  " << transfer.other;
-        }
-        return os;
-    }
 
     //optimizer implimentations
     struct BalanceOptimizer::BalanceOptimizerImpl {
@@ -145,38 +147,35 @@ namespace AccountBalancer {
                 }
             }
         }
-        //now doing lazy evaluating
+        //now doing lazy matching
         int pos_c = 0, pos_d = 0;
         while (pos_c < creditor_gaps.size() && pos_d < debtor_gaps.size()) {
             const std::string& creditor = creditor_gaps[pos_c].first;
-            double& creditor_gap = creditor_gaps[pos_c].second;
+            double creditor_gap = creditor_gaps[pos_c].second;
 
             const std::string& debtor = debtor_gaps[pos_d].first;
-            double& debtor_gap = debtor_gaps[pos_d].second;
-            if (Utils::isEqual(creditor_gap, debtor_gap)) {
+            double debtor_gap = debtor_gaps[pos_d].second;
+            if (Utils::isEqual(creditor_gap, 0.0)) {
                 ++pos_c;
                 continue;
             }
-            if (Utils::isEqual(debtor_gap, creditor_gap)) {
+            if (Utils::isEqual(debtor_gap, 0.0)) {
                 ++pos_d;
                 continue;
             }
             if (Utils::isGreater(creditor_gap, debtor_gap)) {
                 pimpl->result.at(creditor).addTransfer(Transfer(debtor, debtor_gap));
                 pimpl->result.at(debtor).addTransfer(Transfer(creditor, -debtor_gap));
-                creditor_gap -= debtor_gap;
-                ++pos_d;
+                creditor_gaps[pos_c].second -= debtor_gaps[pos_d++].second;
             }
             else if (Utils::isGreater(debtor_gap, creditor_gap)) {
                 pimpl->result.at(creditor).addTransfer(Transfer(debtor, creditor_gap));
                 pimpl->result.at(debtor).addTransfer(Transfer(creditor, -creditor_gap));
-                debtor_gap -= creditor_gap;
-                ++pos_c;
+                debtor_gaps[pos_d].second -= creditor_gaps[pos_c++].second;
             }
             else {
                 pimpl->result.at(creditor).addTransfer(Transfer(debtor, creditor_gap));
                 pimpl->result.at(debtor).addTransfer(Transfer(creditor, -debtor_gap));
-
                 ++pos_c;
                 ++pos_d;
             }
@@ -193,34 +192,31 @@ namespace AccountBalancer {
         int pos_c = 0, pos_d = 0;
         while (pos_c < creditor_gaps.size() && pos_d < debtor_gaps.size()) {
             const std::string& creditor = creditor_gaps[pos_c].first;
-            double& creditor_gap = creditor_gaps[pos_c].second;
+            double creditor_gap = creditor_gaps[pos_c].second;
 
             const std::string& debtor = debtor_gaps[pos_d].first;
-            double& debtor_gap = debtor_gaps[pos_d].second;
-            if (Utils::isEqual(creditor_gap, debtor_gap)) {
+            double debtor_gap = debtor_gaps[pos_d].second;
+            if (Utils::isEqual(creditor_gap, 0.0)) {
                 ++pos_c;
                 continue;
             }
-            if (Utils::isEqual(debtor_gap, creditor_gap)) {
+            if (Utils::isEqual(debtor_gap, 0.0)) {
                 ++pos_d;
                 continue;
             }
             if (Utils::isGreater(creditor_gap, debtor_gap)) {
                 pimpl->result.at(creditor).addTransfer(Transfer(debtor, debtor_gap));
                 pimpl->result.at(debtor).addTransfer(Transfer(creditor, -debtor_gap));
-                creditor_gap -= debtor_gap;
-                ++pos_d;
+                creditor_gaps[pos_c].second -= debtor_gaps[pos_d++].second;
             }
             else if (Utils::isGreater(debtor_gap, creditor_gap)) {
                 pimpl->result.at(creditor).addTransfer(Transfer(debtor, creditor_gap));
                 pimpl->result.at(debtor).addTransfer(Transfer(creditor, -creditor_gap));
-                debtor_gap -= creditor_gap;
-                ++pos_c;
+                debtor_gaps[pos_d].second -= creditor_gaps[pos_c++].second;
             }
             else {
                 pimpl->result.at(creditor).addTransfer(Transfer(debtor, creditor_gap));
                 pimpl->result.at(debtor).addTransfer(Transfer(creditor, -debtor_gap));
-
                 ++pos_c;
                 ++pos_d;
             }
@@ -229,6 +225,8 @@ namespace AccountBalancer {
     }
 
     BalanceOptimizer::BalanceOptimizer(): pimpl(std::make_unique<BalanceOptimizerImpl>()) {}
+
+    BalanceOptimizer::~BalanceOptimizer() = default;
 
     bool BalanceOptimizer::isUpToTime (
             const std::chrono::time_point<std::chrono::system_clock>& time_point) const {
@@ -264,7 +262,8 @@ namespace AccountBalancer {
             if (pimpl->result.find(creditor) == pimpl->result.end()) {
                 pimpl->result.emplace(creditor, creditor);
             }
-            pimpl->result.at(creditor).getPaymentMade() += amount;
+            pimpl->result.at(creditor).getPaymentMadeValue() += amount;
+            pimpl->result.at(creditor).addPayment(expense);
         }
         switch (strategy) {
             case OptimizerStrategy::LEAST_TRANSFER:
@@ -279,8 +278,14 @@ namespace AccountBalancer {
             return OptimizerStatus::NAME_NOT_FOUND;
         }
         const TransferSummary summary = pimpl->result.at(name);
-        for (const Transfer& transfer: summary.getTransfers()) {
-            std::cout << "\t" << transfer << std::endl;
+        if (summary.getTransfers().empty()) {
+            std::cout << "No Money Transfer Needed" << std::endl;
+        }
+        else {
+            std::cout << "Suggested Transfers: " << std::endl;
+            for (const Transfer& transfer: summary.getTransfers()) {
+                printTransfer(transfer);
+            }
         }
         return OptimizerStatus::SUCCESS;
     }
@@ -292,36 +297,33 @@ namespace AccountBalancer {
         }
         const TransferSummary summary = pimpl->result.at(name);
         
-        std::vector<std::shared_ptr<Expense>> expense_paid;
-
-        std::cout << "Expenses Details " << std::endl;
+        std::cout << "Expense Breakdown " << std::endl;
         for (auto expense_wptr: summary.getExpenses()) {
             if (expense_wptr.expired())  return OptimizerStatus::OUT_OF_TIME;
             auto expense_sptr = expense_wptr.lock();
-            //if the creditor, push into the expense
-            if (expense_sptr->getCreditor() == name)    expense_paid.push_back(expense_sptr);
             //all the attributes
             double total_amount = expense_sptr->getAmount();
             int share =expense_sptr->getWeight(name);
             int total_weight = expense_sptr->getWeightSum();
             double amount = total_amount * static_cast<double>(share) / static_cast<double>(total_weight);
-            const char* note = expense_sptr->getNote().c_str();
-            printf("$%-8.2f%-15s(%d out of %d)\n", amount, note, share, total_weight);
+            printf("$%-8.2f%-30s(%d out of %d)\n", amount, expense_sptr->getNote().c_str()
+                    , share, total_weight);
         }
-        printf("Total expenses:         $%-.2f\n", summary.getTotalExpense());
+        printf("Total amount of expense:    $%-.2f\n", summary.getTotalExpense());
         std::cout << std::endl;
 
+        auto expense_paid = summary.getPayments();
         if (!expense_paid.empty()) {
             std::cout << "Expense paid by " << name << std::endl;
-            for (auto& expense_sptr: expense_paid) {
+            for (auto& expense_wptr: expense_paid) {
+                auto expense_sptr = expense_wptr.lock();
                 double total_amount = expense_sptr->getAmount();
-                const char* note = expense_sptr->getNote().c_str();
-                printf("$%-8.2f%-15s\n", total_amount, note);
+                printf("$%-8.2f%-15s\n", total_amount, expense_sptr->getNote().c_str());
             }
-            printf("Total payment made:     $%-.2f\n", summary.getPaymentMade());
+            printf("Total payment made:         $%-.2f\n", summary.getPaymentMadeValue());
         }
         else {
-            std::cout << "No payment was paid by " << name << std::endl;
+            std::cout << "No payment was made by " << name << std::endl;
         }
         return OptimizerStatus::SUCCESS;
     }
@@ -331,18 +333,20 @@ namespace AccountBalancer {
             return OptimizerStatus::NAME_NOT_FOUND;
         }
         std::cout << std::string(60, '-') << std::endl;
-        int padding = (60 - name.size() - 4) / 2;
+        int padding = (60 - name.size()) / 2 - 4;
         if (padding < 0)    padding = 0;
-        std::cout << std::string(padding, '-') << std::string(4, ' ') << name 
-            << std::string(4, ' ') << std::string(padding, '-') << std::endl;
+        std::string leftPadding = std::string(padding, '-');
+        std::string rightPadding = name.size() % 2? std::string(padding + 1, '-'): leftPadding;
+        std::cout << leftPadding<< std::string(4, ' ') << name 
+            << std::string(4, ' ') << rightPadding << std::endl;
         std::cout << std::endl;
         OptimizerStatus return_code = printParticipantExpenses(name);
-        if (return_code == OptimizerStatus::SUCCESS) {
+        if (return_code != OptimizerStatus::SUCCESS) {
             return return_code;
         }
         std::cout << std::endl;
         return_code = printParticipantTransfers(name);
-        if (return_code == OptimizerStatus::SUCCESS)
+        if (return_code != OptimizerStatus::SUCCESS)
             return return_code;
         std::cout << std::endl;
         return OptimizerStatus::SUCCESS;
@@ -357,6 +361,8 @@ namespace AccountBalancer {
         const std::string name;
         //all the expenses that is engaged in, use weak pointer since it might dangle
         std::vector<std::weak_ptr<Expense>> expenses;
+        //a vector of payment made by this person
+        std::vector<std::weak_ptr<Expense>> payments;
         //a list of transfers that are supposed to happen, it is a list of debt, also, use weak_ptr
         std::vector<Transfer> transfers;
         //total expense, this is the expense this person should make
@@ -409,6 +415,13 @@ namespace AccountBalancer {
         }
     }
 
+    //add one more payment made
+    void TransferSummary::addPayment(std::shared_ptr<Expense> payment) {
+        if (payment) {
+            pimpl->payments.push_back(std::weak_ptr<Expense>(payment));
+        }
+    }
+
     //add one more transfer
     void TransferSummary::addTransfer(const Transfer& transfer) {
         pimpl->transfers.push_back(transfer);
@@ -428,11 +441,11 @@ namespace AccountBalancer {
     }
 
     //get payment made
-    double& TransferSummary::getPaymentMade() {
+    double& TransferSummary::getPaymentMadeValue() {
         return pimpl->payment_made;
     }
 
-    const double& TransferSummary::getPaymentMade() const {
+    const double& TransferSummary::getPaymentMadeValue() const {
         return pimpl->payment_made;
     }
 
@@ -444,10 +457,28 @@ namespace AccountBalancer {
     const std::vector<Transfer>& TransferSummary::getTransfers() const {
         return pimpl->transfers;
     }
+
+    //get payments
+    std::vector<std::weak_ptr<Expense>>& TransferSummary::getPayments() {
+        return pimpl->payments;
+    }
+
+    const std::vector<std::weak_ptr<Expense>>& TransferSummary::getPayments() const {
+        return pimpl->payments;
+    }
+    //get expenses
+    std::vector<std::weak_ptr<Expense>>& TransferSummary::getExpenses() {
+        return pimpl->expenses;
+    }
+    
+    const std::vector<std::weak_ptr<Expense>>& TransferSummary::getExpenses() const{
+        return pimpl->expenses;
+    }
 } //AccountBalancer
 
 namespace std {
-    void swap(AccountBalancer::TransferSummary& left, 
+    template<>
+    void swap<AccountBalancer::TransferSummary> (AccountBalancer::TransferSummary& left, 
             AccountBalancer::TransferSummary& right) noexcept {
         left.swap(right);
     }

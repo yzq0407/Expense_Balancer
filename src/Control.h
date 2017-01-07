@@ -1,5 +1,5 @@
 //Interface for the control of whole program
-//Created by Theodore Yang on 1/1/2017
+//Created by Theodore Yang on 1/4/2017
 #ifndef __BALANCE_CONTROL_H
 #define __BALANCE_CONTROL_H
 

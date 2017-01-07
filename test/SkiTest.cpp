@@ -1,3 +1,5 @@
+//Created by Theodore Yang on 1/5/2017
+//a real share expense experience optimized by this program
 #include "../src/Expense.h"
 #include "../src/Optimizer.h"
 

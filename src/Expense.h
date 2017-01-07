@@ -2,7 +2,7 @@
 #define __BALANCE_EXPENSE_H
 //this class implement every expense details include 
 //amount, share people, share weights, notes etc
-//Created by Theodore Yang on 1/1/2017
+//Created by Theodore Yang on 1/4/2017
 
 #include <stack>
 #include <map>
@@ -23,8 +23,11 @@ namespace AccountBalancer {
     public:
         //constructor
         explicit Expense(const std::string& _creditor,
-                double _amount = 0,
-                const std::set<std::string>& participants = {});
+                double _amount = 0);
+
+        Expense(const std::string& _creditor,
+                double _amount,
+                const std::string& _note);
         //dtor
         ~Expense();
 
@@ -39,8 +42,7 @@ namespace AccountBalancer {
         const std::map<std::string, int>& getWeightsMap() const;
 
         void printCommitsHistory(bool verbose = true) const;
-        void printExpenseTitle() const;
-        void printExpenseWeight() const;
+        void printExpenseSummary() const;
 
         //modifiers
         void setNote(std::string) noexcept;
@@ -56,6 +58,7 @@ namespace AccountBalancer {
         std::vector<Utils::Debt> toDebts(bool isReverse = false);
 
     private:
+        bool verbose = false;
         //creditor
         std::string creditor;
         //total amount, always nonegative
@@ -69,7 +72,10 @@ namespace AccountBalancer {
         //total weight
         int total_weight;
 
-    friend std::ostream& operator<<(std::ostream&, const Expense&);
+        //format the weight information so that we can facillitate printing
+        std::vector<std::string> formatWeightsString() const;
+
+        friend std::ostream& operator<<(std::ostream&, const Expense&);
     };
 
     std::ostream& operator<<(std::ostream& s, const Expense& expense);

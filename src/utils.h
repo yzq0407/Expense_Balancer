@@ -25,8 +25,17 @@ namespace AccountBalancer {
 
         std::ostream& operator<<(std::ostream& os, const Debt& transaction);
 
+        //double compare functions
         inline bool isEqual(double a, double b) {
             return std::abs(a - b) <= eps;
+        }
+
+        inline bool isGreater(double a, double b) {
+            return std::abs(a - b) > eps && a > b;
+        }
+
+        inline bool isLess(double a, double b) {
+            return std::abs(a - b) > eps && a < b;
         }
 
         //split a line by space delimiter

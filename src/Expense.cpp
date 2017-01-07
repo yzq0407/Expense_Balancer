@@ -1,8 +1,9 @@
 //implement the expense class
-//Created by Theodore Yang on 1/1/2017
+//Created by Theodore Yang on 1/4/2017
 
 #include <iostream>
 #include <set>
+#include <sstream>
 #include "Expense.h"
 namespace {
     constexpr const char* default_note = "no notes";
@@ -88,20 +89,22 @@ namespace AccountBalancer {
     //--------------------------Expense---------------------------
     //ctor
     Expense::Expense(const std::string& _creditor, 
-            double _amount,
-            const std::set<std::string>& participants):
+            double _amount):
         creditor(_creditor),
         amount(_amount), 
         note(default_note),
-        total_weight(participants.size()){
-        for (const auto& participant: participants) {
-             weights[participant] = 1;
-         }
-    }
+        total_weight(0){}
+
+    Expense::Expense(const std::string& _creditor,
+            double _amount,
+            const std::string& _note):
+        creditor(_creditor),
+        amount(_amount),
+        note(_note),
+        total_weight(0){}
 
     //dtor
     Expense::~Expense() = default;
-
 
     //accessors
     int Expense::numOfParticipants() const noexcept {
@@ -142,20 +145,15 @@ namespace AccountBalancer {
         }
     }
 
-    void Expense::printExpenseTitle() const {
-        std::cout << "  Creditor:  " << creditor << std::endl;
-        std::cout << "  Amount:    $" << amount << std::endl;
-        std::cout << "  Shared by  " << weights.size() << " people" << std::endl;
-        std::cout << "  Note:      " << note << std::endl;
-    }
-
-    void Expense::printExpenseWeight() const {
-        std::cout << "  Weight:    ";
-        for (auto& weight_pair: weights) {
-            std::cout <<weight_pair.first << "(" << weight_pair.second << ")  ";
+    void Expense::printExpenseSummary() const {
+        printf("%s\n", note.c_str());
+        printf("Creditor:  %25s\n", creditor.c_str());
+        printf("Amount:  %27.2f\n", amount);
+        std::vector<std::string> weights = formatWeightsString();
+        printf("Shared by:  %-42s\n", weights[0].c_str());
+        for (int i = 1; i < weights.size(); ++i) {
+            printf("            %-42s\n", weights[i].c_str());
         }
-        std::cout << std::endl;
-        std::cout << std::endl;
     }
 
     //modifiers
@@ -176,7 +174,9 @@ namespace AccountBalancer {
                 total_weight += 1;
             }
             else {
-                std::cerr << "ignore " << name << " for it is already in the participants list" << std::endl;
+                if (verbose) {
+                    std::cerr << "ignore " << name << " for it is already in the participants list" << std::endl;
+                }
             }
         }
         commit_hist.push_back(std::move(commit_ptr));
@@ -189,16 +189,19 @@ namespace AccountBalancer {
                 commit_ptr->diffs.push_back(std::make_pair(name, 
                             std::make_pair(weights[name], 0)));
                 total_weight -= weights[name];
+                if (verbose)
+                    std::cout << "remove " << name << " as a participant" << std::endl;
                 weights.erase(name);
             }
             else {
-                std::cerr << "ignore " << name << " for it's not in the participants list" << std::endl;
+                if (verbose)
+                    std::cerr << "ignore " << name << " for it's not in the participants list" << std::endl;
             }
         }
         commit_hist.push_back(std::move(commit_ptr));
         //make sure there is at least one participant
         if (weights.empty()) {
-            std::cout << "at least one participant has to show up" << std::endl;
+            std::cerr << "at least one participant has to show up" << std::endl;
             rollBack();
         }
     }
@@ -219,7 +222,13 @@ namespace AccountBalancer {
             total_weight += (after - before);
             commit_ptr->diffs.push_back(std::make_pair(change.first,
                         std::make_pair(before, after)));
-            weights[change.first] = after;
+            if (!after) {
+                if (verbose)
+                    std::cout << "remove " << change.first << " as a participant" << std::endl;
+                weights.erase(change.first);
+            }
+            else
+                weights[change.first] = after;
         }
         commit_hist.push_back(std::move(commit_ptr));
     }
@@ -262,6 +271,33 @@ namespace AccountBalancer {
             double share = static_cast<double>(it->second) / totalWeight;
             res.push_back(Debt(creditor, it->first, coeff * share * amount));
         }
+        return res;
+    }
+    
+    std::vector<std::string> Expense::formatWeightsString() const {
+        constexpr int one_line_width = 42;
+        //format the string such that they are 42 characters each line
+        int width_now = 0;
+        std::stringstream line;
+        std::vector<std::string> res;
+        for (const auto& weight_pair: weights) {
+            const std::string pair_str = weight_pair.first + "(" +
+                std::to_string(weight_pair.second) + ")";
+            /* std::cout << line.str() << std::endl; */
+            int offset = width_now == 0? 0: 1;
+            if ((width_now + pair_str.size() + offset) <= one_line_width)
+            {
+                line << (offset?  " ": "") << pair_str;
+                width_now += offset + pair_str.size();
+            }
+            else {
+                res.push_back(line.str());
+                line.str(std::string());
+                line << pair_str;
+                width_now = pair_str.size();
+            }
+        }
+        res.push_back(line.str());
         return res;
     }
 

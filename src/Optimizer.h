@@ -1,3 +1,5 @@
+//This class optimize balance transfers given bunch of expenses
+//Created by Theodore Yang on 1/5/2017
 #ifndef __BALANCE_OPTIMIZER_H
 #define __BALANCE_OPTIMIZER_H
 #include <string>
@@ -42,6 +44,8 @@ namespace AccountBalancer {
 
     public:
         BalanceOptimizer();
+
+        ~BalanceOptimizer();
 
         //test whether this optimizer is a valid (newer than the given time)
         bool isUpToTime(const std::chrono::time_point<std::chrono::system_clock>& time_point) const;
@@ -93,6 +97,8 @@ namespace AccountBalancer {
 
         //add one more expense
         void addExpense(std::shared_ptr<Expense> expense);
+        //add one more payment
+        void addPayment(std::shared_ptr<Expense> payment);
 
         //add one more transfer
         void addTransfer(const Transfer& transfer);
@@ -103,16 +109,20 @@ namespace AccountBalancer {
         const double& getTotalExpense() const;
 
         //get how much this person paid at the first place
-        double& getPaymentMade();
-        const double& getPaymentMade() const;
+        double& getPaymentMadeValue();
+        const double& getPaymentMadeValue() const;
 
         //get all the transfers
         std::vector<Transfer>& getTransfers();
         const std::vector<Transfer>& getTransfers() const;
 
+        //get all the payments
+        std::vector<std::weak_ptr<Expense>>& getPayments();
+        const std::vector<std::weak_ptr<Expense>>& getPayments() const;
+
         //get all the expenses
-        std::vector<std::weak_ptr<Expense>> getExpenses();
-        const std::vector<std::weak_ptr<Expense>> getExpenses() const;
+        std::vector<std::weak_ptr<Expense>>& getExpenses();
+        const std::vector<std::weak_ptr<Expense>>& getExpenses() const;
     };
 } //AccountBalancer
 
