@@ -1,0 +1,397 @@
+Day 1 Housing
+Creditor:                     Ni_Min
+Amount:                       346.00
+Shared by:  Gao_Jian(1) Li_Qiao(1) Lu_YiMing(1)       
+            MingYan(1) Ni_Min(1) Sun_HaoChen(1)       
+            Yang_ZheQin(1) You_Jie(1)                 
+            Zheng_ChengJian(1)                        
+
+Day 2 Housing
+Creditor:                     Ni_Min
+Amount:                       346.00
+Shared by:  Hao_YingShuai(1) Jian_Tong(1) Li_Qiao(1)  
+            Lu_YiMing(1) MingYan(1) Ni_Min(1)         
+            Sun_HaoChen(1) Yang_ZheQin(1) You_Jie(1)  
+            Zheng_ChengJian(1)                        
+
+Day 3 Housing
+Creditor:                     Ni_Min
+Amount:                       346.00
+Shared by:  Hao_YingShuai(1) Jian_Tong(1) Li_Qiao(1)  
+            Lu_YiMing(1) Ni_Min(1) Sun_HaoChen(1)     
+            Yang_ZheQin(1) You_Jie(1)                 
+
+Day 1 Ski Lift Ticket
+Creditor:                  Lu_YiMing
+Amount:                       475.00
+Shared by:  Li_Qiao(1) Lu_YiMing(1) MingYan(1)        
+            Ni_Min(1) Sun_HaoChen(1) You_Jie(1)       
+            Zheng_ChengJian(1)                        
+
+Day 2 Ski Lift Ticket
+Creditor:                  Lu_YiMing
+Amount:                        95.00
+Shared by:  Hao_YingShuai(1) Jian_Tong(1) Lu_YiMing(1)
+            MingYan(1) Ni_Min(1) Zheng_ChengJian(1)   
+
+Day 3 Ski Lift Ticket
+Creditor:                  Lu_YiMing
+Amount:                       182.00
+Shared by:  Hao_YingShuai(1) Jian_Tong(1) Lu_YiMing(1)
+            MingYan(1) Ni_Min(1) Sun_HaoChen(1)       
+            You_Jie(1) Zheng_ChengJian(1)             
+
+Season passes rental
+Creditor:                Yang_ZheQin
+Amount:                       180.00
+Shared by:  Hao_YingShuai(2) Jian_Tong(2) Li_Qiao(1)  
+            Lu_YiMing(3) MingYan(3) Ni_Min(3)         
+            Sun_HaoChen(2) You_Jie(2)                 
+            Zheng_ChengJian(3)                        
+
+Car rental
+Creditor:                Yang_ZheQin
+Amount:                       652.72
+Shared by:  Li_Qiao(1) Lu_YiMing(1) Ni_Min(1)         
+            Sun_HaoChen(1) Yang_ZheQin(1) You_Jie(1)  
+
+Gas of rental car
+Creditor:                Yang_ZheQin
+Amount:                        98.12
+Shared by:  Li_Qiao(1) Lu_YiMing(1) Ni_Min(1)         
+            Sun_HaoChen(1) Yang_ZheQin(1) You_Jie(1)  
+
+Season passes mailing
+Creditor:                  Lu_YiMing
+Amount:                         9.28
+Shared by:  Hao_YingShuai(2) Jian_Tong(2) Li_Qiao(1)  
+            Lu_YiMing(3) MingYan(3) Ni_Min(3)         
+            Sun_HaoChen(2) You_Jie(2)                 
+            Zheng_ChengJian(3)                        
+
+Ben&Jerry tickets
+Creditor:                  Lu_YiMing
+Amount:                        32.00
+Shared by:  Hao_YingShuai(1) Jian_Tong(1) Li_Qiao(1)  
+            Lu_YiMing(1) Ni_Min(1) Sun_HaoChen(1)     
+            Yang_ZheQin(1) You_Jie(1)                 
+
+Sam's purchases
+Creditor:            Zheng_ChengJian
+Amount:                       129.85
+Shared by:  Gao_Jian(1) Hao_YingShuai(2) Jian_Tong(2) 
+            Li_Qiao(3) Lu_YiMing(3) MingYan(2)        
+            Ni_Min(3) Sun_HaoChen(3) Yang_ZheQin(3)   
+            You_Jie(3) Zheng_ChengJian(2)             
+
+Drink water purchase
+Creditor:              Hao_YingShuai
+Amount:                         3.79
+Shared by:  Gao_Jian(1) Hao_YingShuai(2) Jian_Tong(2) 
+            Li_Qiao(3) Lu_YiMing(3) MingYan(2)        
+            Ni_Min(3) Sun_HaoChen(3) Yang_ZheQin(3)   
+            You_Jie(3) Zheng_ChengJian(2)             
+
+Chinese Supermarket purchases
+Creditor:                  Lu_YiMing
+Amount:                       309.97
+Shared by:  Gao_Jian(1) Hao_YingShuai(2) Jian_Tong(2) 
+            Li_Qiao(3) Lu_YiMing(3) MingYan(2)        
+            Ni_Min(3) Sun_HaoChen(3) Yang_ZheQin(3)   
+            You_Jie(3) Zheng_ChengJian(2)             
+
+Groceries purchases
+Creditor:                    You_Jie
+Amount:                        61.90
+Shared by:  Gao_Jian(1) Hao_YingShuai(2) Jian_Tong(2) 
+            Li_Qiao(3) Lu_YiMing(3) MingYan(2)        
+            Ni_Min(3) Sun_HaoChen(3) Yang_ZheQin(3)   
+            You_Jie(3) Zheng_ChengJian(2)             
+
+------------------------------------------------------------
+----------------------    You_Jie    -----------------------
+
+Expense Breakdown 
+$38.44   Day 1 Housing                 (1 out of 9)
+$34.60   Day 2 Housing                 (1 out of 10)
+$43.25   Day 3 Housing                 (1 out of 8)
+$67.86   Day 1 Ski Lift Ticket         (1 out of 7)
+$22.75   Day 3 Ski Lift Ticket         (1 out of 8)
+$17.14   Season passes rental          (2 out of 21)
+$108.79  Car rental                    (1 out of 6)
+$16.35   Gas of rental car             (1 out of 6)
+$0.88    Season passes mailing         (2 out of 21)
+$4.00    Ben&Jerry tickets             (1 out of 8)
+$14.43   Sam's purchases               (3 out of 27)
+$0.42    Drink water purchase          (3 out of 27)
+$34.44   Chinese Supermarket purchases (3 out of 27)
+$6.88    Groceries purchases           (3 out of 27)
+Total amount of expense:    $410.24
+
+number of expenses: 1
+Expense paid by You_Jie
+$61.90   Groceries purchases
+Total payment made:         $61.90
+
+Suggested Transfers: 
+Send       $348.34  to         Yang_ZheQin
+
+------------------------------------------------------------
+---------------------    Lu_YiMing    ----------------------
+
+Expense Breakdown 
+$38.44   Day 1 Housing                 (1 out of 9)
+$34.60   Day 2 Housing                 (1 out of 10)
+$43.25   Day 3 Housing                 (1 out of 8)
+$67.86   Day 1 Ski Lift Ticket         (1 out of 7)
+$15.83   Day 2 Ski Lift Ticket         (1 out of 6)
+$22.75   Day 3 Ski Lift Ticket         (1 out of 8)
+$25.71   Season passes rental          (3 out of 21)
+$108.79  Car rental                    (1 out of 6)
+$16.35   Gas of rental car             (1 out of 6)
+$1.33    Season passes mailing         (3 out of 21)
+$4.00    Ben&Jerry tickets             (1 out of 8)
+$14.43   Sam's purchases               (3 out of 27)
+$0.42    Drink water purchase          (3 out of 27)
+$34.44   Chinese Supermarket purchases (3 out of 27)
+$6.88    Groceries purchases           (3 out of 27)
+Total amount of expense:    $435.08
+
+number of expenses: 6
+Expense paid by Lu_YiMing
+$475.00  Day 1 Ski Lift Ticket
+$95.00   Day 2 Ski Lift Ticket
+$182.00  Day 3 Ski Lift Ticket
+$9.28    Season passes mailing
+$32.00   Ben&Jerry tickets
+$309.97  Chinese Supermarket purchases
+Total payment made:         $1103.25
+
+Suggested Transfers: 
+Receive    $257.93  from           Li_Qiao
+Receive    $410.24  from       Sun_HaoChen
+
+------------------------------------------------------------
+-----------------------    Ni_Min    -----------------------
+
+Expense Breakdown 
+$38.44   Day 1 Housing                 (1 out of 9)
+$34.60   Day 2 Housing                 (1 out of 10)
+$43.25   Day 3 Housing                 (1 out of 8)
+$67.86   Day 1 Ski Lift Ticket         (1 out of 7)
+$15.83   Day 2 Ski Lift Ticket         (1 out of 6)
+$22.75   Day 3 Ski Lift Ticket         (1 out of 8)
+$25.71   Season passes rental          (3 out of 21)
+$108.79  Car rental                    (1 out of 6)
+$16.35   Gas of rental car             (1 out of 6)
+$1.33    Season passes mailing         (3 out of 21)
+$4.00    Ben&Jerry tickets             (1 out of 8)
+$14.43   Sam's purchases               (3 out of 27)
+$0.42    Drink water purchase          (3 out of 27)
+$34.44   Chinese Supermarket purchases (3 out of 27)
+$6.88    Groceries purchases           (3 out of 27)
+Total amount of expense:    $435.08
+
+number of expenses: 3
+Expense paid by Ni_Min
+$346.00  Day 1 Housing  
+$346.00  Day 2 Housing  
+$346.00  Day 3 Housing  
+Total payment made:         $1038.00
+
+Suggested Transfers: 
+Receive    $57.17   from          Gao_Jian
+Receive    $114.12  from   Zheng_ChengJian
+Receive    $172.12  from     Hao_YingShuai
+Receive    $175.91  from         Jian_Tong
+Receive    $83.61   from           MingYan
+
+------------------------------------------------------------
+----------------------    Li_Qiao    -----------------------
+
+Expense Breakdown 
+$38.44   Day 1 Housing                 (1 out of 9)
+$34.60   Day 2 Housing                 (1 out of 10)
+$43.25   Day 3 Housing                 (1 out of 8)
+$67.86   Day 1 Ski Lift Ticket         (1 out of 7)
+$8.57    Season passes rental          (1 out of 21)
+$108.79  Car rental                    (1 out of 6)
+$16.35   Gas of rental car             (1 out of 6)
+$0.44    Season passes mailing         (1 out of 21)
+$4.00    Ben&Jerry tickets             (1 out of 8)
+$14.43   Sam's purchases               (3 out of 27)
+$0.42    Drink water purchase          (3 out of 27)
+$34.44   Chinese Supermarket purchases (3 out of 27)
+$6.88    Groceries purchases           (3 out of 27)
+Total amount of expense:    $378.47
+
+No payment was made by Li_Qiao
+
+Suggested Transfers: 
+Send       $120.54  to         Yang_ZheQin
+Send       $257.93  to           Lu_YiMing
+
+------------------------------------------------------------
+--------------------    Sun_HaoChen    ---------------------
+
+Expense Breakdown 
+$38.44   Day 1 Housing                 (1 out of 9)
+$34.60   Day 2 Housing                 (1 out of 10)
+$43.25   Day 3 Housing                 (1 out of 8)
+$67.86   Day 1 Ski Lift Ticket         (1 out of 7)
+$22.75   Day 3 Ski Lift Ticket         (1 out of 8)
+$17.14   Season passes rental          (2 out of 21)
+$108.79  Car rental                    (1 out of 6)
+$16.35   Gas of rental car             (1 out of 6)
+$0.88    Season passes mailing         (2 out of 21)
+$4.00    Ben&Jerry tickets             (1 out of 8)
+$14.43   Sam's purchases               (3 out of 27)
+$0.42    Drink water purchase          (3 out of 27)
+$34.44   Chinese Supermarket purchases (3 out of 27)
+$6.88    Groceries purchases           (3 out of 27)
+Total amount of expense:    $410.24
+
+No payment was made by Sun_HaoChen
+
+Suggested Transfers: 
+Send       $410.24  to           Lu_YiMing
+
+------------------------------------------------------------
+------------------    Zheng_ChengJian    -------------------
+
+Expense Breakdown 
+$38.44   Day 1 Housing                 (1 out of 9)
+$34.60   Day 2 Housing                 (1 out of 10)
+$67.86   Day 1 Ski Lift Ticket         (1 out of 7)
+$15.83   Day 2 Ski Lift Ticket         (1 out of 6)
+$22.75   Day 3 Ski Lift Ticket         (1 out of 8)
+$25.71   Season passes rental          (3 out of 21)
+$1.33    Season passes mailing         (3 out of 21)
+$9.62    Sam's purchases               (2 out of 27)
+$0.28    Drink water purchase          (2 out of 27)
+$22.96   Chinese Supermarket purchases (2 out of 27)
+$4.59    Groceries purchases           (2 out of 27)
+Total amount of expense:    $243.97
+
+number of expenses: 1
+Expense paid by Zheng_ChengJian
+$129.85  Sam's purchases
+Total payment made:         $129.85
+
+Suggested Transfers: 
+Send       $114.12  to              Ni_Min
+
+------------------------------------------------------------
+----------------------    MingYan    -----------------------
+
+Expense Breakdown 
+$38.44   Day 1 Housing                 (1 out of 9)
+$34.60   Day 2 Housing                 (1 out of 10)
+$67.86   Day 1 Ski Lift Ticket         (1 out of 7)
+$15.83   Day 2 Ski Lift Ticket         (1 out of 6)
+$22.75   Day 3 Ski Lift Ticket         (1 out of 8)
+$25.71   Season passes rental          (3 out of 21)
+$1.33    Season passes mailing         (3 out of 21)
+$9.62    Sam's purchases               (2 out of 27)
+$0.28    Drink water purchase          (2 out of 27)
+$22.96   Chinese Supermarket purchases (2 out of 27)
+$4.59    Groceries purchases           (2 out of 27)
+Total amount of expense:    $243.97
+
+No payment was made by MingYan
+
+Suggested Transfers: 
+Send       $83.61   to              Ni_Min
+Send       $160.36  to         Yang_ZheQin
+
+------------------------------------------------------------
+--------------------    Yang_ZheQin    ---------------------
+
+Expense Breakdown 
+$38.44   Day 1 Housing                 (1 out of 9)
+$34.60   Day 2 Housing                 (1 out of 10)
+$43.25   Day 3 Housing                 (1 out of 8)
+$108.79  Car rental                    (1 out of 6)
+$16.35   Gas of rental car             (1 out of 6)
+$4.00    Ben&Jerry tickets             (1 out of 8)
+$14.43   Sam's purchases               (3 out of 27)
+$0.42    Drink water purchase          (3 out of 27)
+$34.44   Chinese Supermarket purchases (3 out of 27)
+$6.88    Groceries purchases           (3 out of 27)
+Total amount of expense:    $301.60
+
+number of expenses: 3
+Expense paid by Yang_ZheQin
+$180.00  Season passes rental
+$652.72  Car rental     
+$98.12   Gas of rental car
+Total payment made:         $930.84
+
+Suggested Transfers: 
+Receive    $160.36  from           MingYan
+Receive    $348.34  from           You_Jie
+Receive    $120.54  from           Li_Qiao
+
+------------------------------------------------------------
+----------------------    Gao_Jian    ----------------------
+
+Expense Breakdown 
+$38.44   Day 1 Housing                 (1 out of 9)
+$4.81    Sam's purchases               (1 out of 27)
+$0.14    Drink water purchase          (1 out of 27)
+$11.48   Chinese Supermarket purchases (1 out of 27)
+$2.29    Groceries purchases           (1 out of 27)
+Total amount of expense:    $57.17
+
+No payment was made by Gao_Jian
+
+Suggested Transfers: 
+Send       $57.17   to              Ni_Min
+
+------------------------------------------------------------
+-------------------    Hao_YingShuai    --------------------
+
+Expense Breakdown 
+$34.60   Day 2 Housing                 (1 out of 10)
+$43.25   Day 3 Housing                 (1 out of 8)
+$15.83   Day 2 Ski Lift Ticket         (1 out of 6)
+$22.75   Day 3 Ski Lift Ticket         (1 out of 8)
+$17.14   Season passes rental          (2 out of 21)
+$0.88    Season passes mailing         (2 out of 21)
+$4.00    Ben&Jerry tickets             (1 out of 8)
+$9.62    Sam's purchases               (2 out of 27)
+$0.28    Drink water purchase          (2 out of 27)
+$22.96   Chinese Supermarket purchases (2 out of 27)
+$4.59    Groceries purchases           (2 out of 27)
+Total amount of expense:    $175.91
+
+number of expenses: 1
+Expense paid by Hao_YingShuai
+$3.79    Drink water purchase
+Total payment made:         $3.79
+
+Suggested Transfers: 
+Send       $172.12  to              Ni_Min
+
+------------------------------------------------------------
+---------------------    Jian_Tong    ----------------------
+
+Expense Breakdown 
+$34.60   Day 2 Housing                 (1 out of 10)
+$43.25   Day 3 Housing                 (1 out of 8)
+$15.83   Day 2 Ski Lift Ticket         (1 out of 6)
+$22.75   Day 3 Ski Lift Ticket         (1 out of 8)
+$17.14   Season passes rental          (2 out of 21)
+$0.88    Season passes mailing         (2 out of 21)
+$4.00    Ben&Jerry tickets             (1 out of 8)
+$9.62    Sam's purchases               (2 out of 27)
+$0.28    Drink water purchase          (2 out of 27)
+$22.96   Chinese Supermarket purchases (2 out of 27)
+$4.59    Groceries purchases           (2 out of 27)
+Total amount of expense:    $175.91
+
+No payment was made by Jian_Tong
+
+Suggested Transfers: 
+Send       $175.91  to              Ni_Min
+

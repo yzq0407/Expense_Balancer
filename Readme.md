@@ -1,5 +1,5 @@
 #ExpenseBalancer
-Welcome to ExpenseBalancer, a quick tool to optimize balance transfers when expense sharing is nasty
+Welcome to ExpenseBalancer, a quick tool to optimize balance transfers when expense sharing is nasty.
 It is designed to make the least amount of transfers between participants
 
 ##Command for Main menu
