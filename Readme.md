@@ -7,7 +7,7 @@ It is designed to make the least amount of transfers between participants
     options: 
         -p: add participants to the pool, arguments are names which must be separated by space/spaces.
 
-        -e: create a shared expense report, if no -a option sepecified this will enter into a expense session.
+        -e: create a shared expense report, if no -a option specified this will enter into a expense session.
             arguments are [name of expense] [creditor] [amount] [participants...]
             if no participants specified, everyone are assumed as the participants of this expense
             example:
@@ -21,7 +21,7 @@ It is designed to make the least amount of transfers between participants
 
 ### rm [options] [arguments]
     options:
-        -p: remove participants from the pool, arguments are names which must be separted by space/spaces
+        -p: remove participants from the pool, arguments are names which must be separated by space/spaces
 
         -e: remove a expense session by its name, if duplicates are found, a prompt will show up for confirmation
 
@@ -33,7 +33,7 @@ It is designed to make the least amount of transfers between participants
 
         -e: show all the expenses added, with details (share weight, amount, creditor), no arguments needed
 
-        -t: show all the transfer informations, if the result is not valid, an error will prompt
+        -t: show all the transfer information, if the result is not valid, an error will prompt
             use it after the "opt" command
 
             arguments are the name/names of the person making transfers
@@ -54,7 +54,7 @@ It is designed to make the least amount of transfers between participants
     print this message
 
 ### quit
-    quit expense balancer
+    quit ExpenseBalancer
 
 
 ##Commands for single Expense session
@@ -74,7 +74,7 @@ It is designed to make the least amount of transfers between participants
     options:
         -w: change weights, the arguments are [name weight] pair/pairs, which signify the share weight after change
             example:
-            before: Reagan(1), Cinton(1), Trump(1), Carter(1)
+            before: Reagan(1), Clinton(1), Trump(1), Carter(1)
             do:     cg -w Reagan 0 Trump 5
             after:  Clinton(1), Trump(5), Carter(1)
             Any name that is not in the main menu pool is ignored
